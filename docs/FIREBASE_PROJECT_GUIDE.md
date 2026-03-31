@@ -306,6 +306,20 @@ NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=tudominio.com    # ← NO firebaseapp.com
 Esto funciona porque Firebase Hosting sirve `/__/auth/handler` en tu dominio custom.
 Sin este cambio, los usuarios ven "Ir a tu-proyecto.firebaseapp.com" en el popup.
 
+> **IMPORTANTE: Registrar redirect URIs en Google Cloud Console.**
+> Al cambiar `authDomain` a tu dominio custom, el redirect URI cambia y Google lo rechaza con error `redirect_uri_mismatch` (Error 400).
+>
+> Ir a: **Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID**
+>
+> Agregar en **"Authorized redirect URIs":**
+> ```
+> https://tudominio.com/__/auth/handler
+> https://www.tudominio.com/__/auth/handler
+> https://tu-proyecto.firebaseapp.com/__/auth/handler
+> ```
+>
+> Sin esto, el login con Google **no funciona**. Es el error más común al usar custom authDomain.
+
 #### 4. Configurar pantalla de consentimiento OAuth (opcional)
 - Google Cloud Console → APIs & Services → OAuth consent screen
 - Agregar logo, nombre de app, links de privacidad

@@ -113,6 +113,20 @@ Todas las Cloud Functions están protegidas con rate limiting basado en Firestor
 
 ## Auth Flow
 
+### OAuth Redirect URIs (Google Cloud Console)
+
+Los siguientes URIs deben estar registrados en Google Cloud Console → Credentials → OAuth 2.0 Client:
+
+```
+https://lupyxtalent.com/__/auth/handler
+https://www.lupyxtalent.com/__/auth/handler
+https://lupyx-talent.firebaseapp.com/__/auth/handler
+```
+
+Sin estos, el login falla con `redirect_uri_mismatch` (Error 400).
+
+### Flujo
+
 1. Usuario clickea "Iniciar sesión" → Google Sign-In popup
 2. Firebase Auth genera ID token
 3. Frontend envía token en `Authorization: Bearer <token>`
