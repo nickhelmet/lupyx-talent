@@ -869,6 +869,26 @@ gcloud firestore indexes composite create --project=tu-proyecto \
 - **Dependabot:** Alertas automáticas de seguridad en GitHub
 - **Firebase Security Rules simulator:** Verificar rules en emulator
 
+### Dependabot config
+
+Crear `.github/dependabot.yml` para alertas automáticas de vulnerabilidades:
+
+```yaml
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /              # Frontend
+    schedule: { interval: weekly }
+  - package-ecosystem: npm
+    directory: /functions     # Cloud Functions
+    schedule: { interval: weekly }
+  - package-ecosystem: github-actions
+    directory: /              # Workflows
+    schedule: { interval: weekly }
+```
+
+Genera PRs automáticos cuando detecta dependencias con vulnerabilidades conocidas.
+
 ### Rate limiting en Cloud Functions (crítico para Blaze)
 
 Con plan Blaze, cada invocación tiene costo. Sin rate limiting, un atacante puede generar costos significativos. **Implementar ANTES de ir a producción.**

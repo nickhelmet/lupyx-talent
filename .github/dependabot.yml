@@ -1,0 +1,25 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels:
+      - "devops"
+
+  - package-ecosystem: npm
+    directory: /functions
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels:
+      - "devops"
+      - "backend"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - "devops"
