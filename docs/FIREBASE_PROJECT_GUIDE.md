@@ -299,6 +299,29 @@ Antes de que el login funcione, configurar en Firebase Console:
 - Agregar logo, nombre de app, links de privacidad
 - Solo necesario si querés personalizar lo que ven los usuarios en el popup
 
+### Allowlist: restringir acceso a usuarios autorizados
+
+Para sitios en desarrollo o acceso controlado, usar una allowlist en Firestore:
+
+```
+config/allowlist
+├── allowed_emails: ["user1@gmail.com", "user2@gmail.com"]  ← quién puede acceder
+├── admin_emails: ["admin@example.com"]                      ← quién es admin
+├── blocked_emails: []                                       ← bloqueados explícitamente
+```
+
+**Lógica en authMiddleware:**
+1. Si `allowed_emails` está vacío → acceso abierto (público)
+2. Si tiene emails → solo esos pueden usar las Cloud Functions
+3. `blocked_emails` siempre tiene prioridad (deny > allow)
+4. `admin_emails` otorga rol admin en la respuesta de auth
+
+**Para abrir al público:** vaciar `allowed_emails` en Firestore.
+
+**Seed de datos:** Siempre incluir la allowlist en el script de seed para que nuevos ambientes arranquen con los usuarios correctos.
+
+---
+
 ### Patrón: Firebase Auth + Cloud Functions verification
 
 **Frontend (hook):**
