@@ -58,15 +58,15 @@ export default function AboutUs() {
             <span className="inline-block rounded-full bg-[#2EC4B6]/10 px-4 py-1 text-sm font-semibold text-[#2EC4B6]">
               Sobre nosotros
             </span>
-            <h2 className="mt-4 text-3xl font-bold text-[#0B1F3B] sm:text-4xl">
+            <h2 className="mt-4 text-3xl font-bold text-[#0B1F3B] dark:text-white sm:text-4xl">
               Quiénes somos
             </h2>
-            <p className="mt-6 text-lg leading-relaxed text-[#1F4E79]/80">
+            <p className="mt-6 text-lg leading-relaxed text-[#1F4E79]/80 dark:text-gray-300">
               Somos una consultora de reclutamiento y selección que acompaña a
               las empresas en la identificación, atracción y selección del
               talento adecuado para sus equipos.
             </p>
-            <p className="mt-4 text-lg leading-relaxed text-[#1F4E79]/80">
+            <p className="mt-4 text-lg leading-relaxed text-[#1F4E79]/80 dark:text-gray-300">
               Gestionamos procesos integrales tanto para posiciones IT como
               generales, priorizando la calidad de la experiencia del candidato y
               el alineamiento con el negocio.
@@ -95,13 +95,13 @@ export default function AboutUs() {
               <motion.div
                 key={h.title}
                 variants={item}
-                className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md hover:shadow-[#2EC4B6]/5"
+                className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md hover:shadow-[#2EC4B6]/5 dark:border-white/10 dark:bg-white/5"
               >
                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#2EC4B6]/10 to-[#4FA3D1]/10">
                   <h.icon className="h-5 w-5 text-[#2EC4B6]" />
                 </div>
-                <h3 className="text-sm font-bold text-[#0B1F3B]">{h.title}</h3>
-                <p className="mt-1.5 text-xs leading-relaxed text-[#1F4E79]/60">
+                <h3 className="text-sm font-bold text-[#0B1F3B] dark:text-white">{h.title}</h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-[#1F4E79]/60 dark:text-gray-400">
                   {h.description}
                 </p>
               </motion.div>
