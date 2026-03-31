@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
   { href: "#inicio", label: "Inicio" },
@@ -13,6 +14,7 @@ const navLinks = [
 ];
 
 export default function Header() {
+  const { user, loginWithGoogle, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -53,12 +55,30 @@ export default function Header() {
               </a>
             ))}
             <ThemeToggle />
-            <a
-              href="#busquedas"
-              className="rounded-full bg-[#2EC4B6] px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-[#26a89c] hover:shadow-lg"
-            >
-              Ver búsquedas
-            </a>
+            {user ? (
+              <div className="flex items-center gap-3">
+                <img
+                  src={user.photoURL || ""}
+                  alt=""
+                  className="h-8 w-8 rounded-full"
+                  referrerPolicy="no-referrer"
+                />
+                <button
+                  onClick={logout}
+                  className="text-[#1F4E79]/60 transition-colors hover:text-red-500 dark:text-gray-400"
+                  aria-label="Cerrar sesión"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={loginWithGoogle}
+                className="rounded-full bg-[#2EC4B6] px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-[#26a89c] hover:shadow-lg"
+              >
+                Iniciar sesión
+              </button>
+            )}
           </nav>
 
           {/* Mobile Menu Button */}
