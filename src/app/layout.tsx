@@ -26,7 +26,10 @@ export const metadata: Metadata = {
     "Lupyx Talent",
     "empleo",
     "búsqueda laboral",
+    "Argentina",
+    "remoto",
   ],
+  metadataBase: new URL("https://lupyxtalent.com"),
   openGraph: {
     title: "Lupyx Talent | Conectando talento con oportunidades",
     description:
@@ -35,15 +38,51 @@ export const metadata: Metadata = {
     siteName: "Lupyx Talent",
     locale: "es_AR",
     type: "website",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Lupyx Talent - Conectando talento con oportunidades",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Lupyx Talent",
     description: "Conectando talento con oportunidades",
+    images: ["/og-image.jpg"],
   },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/manifest.json",
   robots: {
     index: true,
     follow: true,
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Lupyx Talent",
+  description:
+    "Consultora de reclutamiento y selección que acompaña a empresas en la identificación, atracción y selección del talento adecuado.",
+  url: "https://lupyxtalent.com",
+  logo: "https://lupyxtalent.com/logo.jpg",
+  sameAs: [
+    "https://www.linkedin.com/company/lupyx-talent/",
+    "https://www.instagram.com/lupyx.talent",
+  ],
+  contactPoint: {
+    "@type": "ContactPoint",
+    email: "jm@lupyxtalent.com",
+    contactType: "recruitment",
   },
 };
 
@@ -56,8 +95,32 @@ export default function RootLayout({
     <html
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
+      <body className="min-h-full flex flex-col bg-white text-[#0B1F3B] dark:bg-[#0a0f1a] dark:text-gray-100">
+        <ThemeScript />
+        {children}
+      </body>
     </html>
   );
+}
+
+function ThemeScript() {
+  const script = `
+    (function() {
+      try {
+        var theme = localStorage.getItem('lupyx-theme');
+        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch(e) {}
+    })();
+  `;
+  return <script dangerouslySetInnerHTML={{ __html: script }} />;
 }

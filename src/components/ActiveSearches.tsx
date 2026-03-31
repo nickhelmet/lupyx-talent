@@ -73,7 +73,7 @@ const item = {
 
 export default function ActiveSearches() {
   return (
-    <section id="busquedas" className="bg-[#f8fafb] py-20 sm:py-28">
+    <section id="busquedas" className="bg-[#f8fafb] py-20 dark:bg-[#0d1520] sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section header */}
         <motion.div
@@ -86,10 +86,10 @@ export default function ActiveSearches() {
           <span className="inline-block rounded-full bg-[#2EC4B6]/10 px-4 py-1 text-sm font-semibold text-[#2EC4B6]">
             Oportunidades
           </span>
-          <h2 className="mt-4 text-3xl font-bold text-[#0B1F3B] sm:text-4xl">
+          <h2 className="mt-4 text-3xl font-bold text-[#0B1F3B] dark:text-white sm:text-4xl">
             Búsquedas activas
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-[#1F4E79]/70">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-[#1F4E79]/70 dark:text-gray-400">
             Explorá las posiciones que estamos buscando actualmente. Todas
             nuestras búsquedas ofrecen compensación en USD.
           </p>
@@ -107,7 +107,7 @@ export default function ActiveSearches() {
             <motion.div
               key={job.id}
               variants={item}
-              className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:shadow-lg hover:shadow-[#2EC4B6]/5 sm:p-8"
+              className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:shadow-lg hover:shadow-[#2EC4B6]/5 dark:border-white/10 dark:bg-white/5 sm:p-8"
             >
               {/* Active badge */}
               <div className="absolute top-4 right-4">
@@ -117,17 +117,17 @@ export default function ActiveSearches() {
                 </span>
               </div>
 
-              <h3 className="text-xl font-bold text-[#0B1F3B] sm:text-2xl">
+              <h3 className="text-xl font-bold text-[#0B1F3B] dark:text-white sm:text-2xl">
                 {job.title}
               </h3>
               <p className="mt-1 text-sm font-medium text-[#1F4E79]/60">
                 {job.company}
               </p>
 
-              <p className="mt-4 text-[#1F4E79]/80">{job.description}</p>
+              <p className="mt-4 text-[#1F4E79]/80 dark:text-gray-300">{job.description}</p>
 
               {/* Details */}
-              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm text-[#1F4E79]/70">
+              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm text-[#1F4E79]/70 dark:text-gray-400">
                 <span className="flex items-center gap-1.5">
                   <MapPin className="h-4 w-4 text-[#4FA3D1]" />
                   {job.location}
@@ -151,7 +151,7 @@ export default function ActiveSearches() {
                 {job.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="rounded-full bg-[#0B1F3B]/5 px-3 py-1 text-xs font-medium text-[#1F4E79]"
+                    className="rounded-full bg-[#0B1F3B]/5 px-3 py-1 text-xs font-medium text-[#1F4E79] dark:bg-white/10 dark:text-gray-300"
                   >
                     {tag}
                   </span>

@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="border-t border-gray-100 bg-white py-12">
+    <footer className="border-t border-gray-100 bg-white py-12 dark:border-white/10 dark:bg-[#0a0f1a]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
           {/* Logo */}
@@ -10,7 +10,7 @@ export default function Footer() {
               alt="Lupyx Talent"
               className="h-10 w-auto"
             />
-            <p className="text-sm text-[#1F4E79]/50">
+            <p className="text-sm text-[#1F4E79]/50 dark:text-gray-500">
               Conectando talento con oportunidades
             </p>
           </div>

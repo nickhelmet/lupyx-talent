@@ -57,10 +57,10 @@ export default function Contact() {
           <span className="inline-block rounded-full bg-[#2EC4B6]/10 px-4 py-1 text-sm font-semibold text-[#2EC4B6]">
             Contacto
           </span>
-          <h2 className="mt-4 text-3xl font-bold text-[#0B1F3B] sm:text-4xl">
+          <h2 className="mt-4 text-3xl font-bold text-[#0B1F3B] dark:text-white sm:text-4xl">
             ¿Hablamos?
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-[#1F4E79]/70">
+          <p className="mx-auto mt-4 max-w-xl text-lg text-[#1F4E79]/70 dark:text-gray-400">
             Ya sea que busques talento para tu equipo o estés explorando nuevas
             oportunidades, nos encantaría conectar.
           </p>
@@ -83,14 +83,14 @@ export default function Contact() {
                   ? undefined
                   : "noopener noreferrer"
               }
-              className={`group flex flex-col items-center gap-3 rounded-2xl border border-gray-100 bg-white p-8 shadow-sm transition-all hover:shadow-lg ${link.bgHover}`}
+              className={`group flex flex-col items-center gap-3 rounded-2xl border border-gray-100 bg-white p-8 shadow-sm transition-all hover:shadow-lg dark:border-white/10 dark:bg-white/5 ${link.bgHover}`}
             >
               <div
                 className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-50 text-[#1F4E79]/60 transition-colors ${link.color}`}
               >
                 <link.icon className="h-8 w-8" />
               </div>
-              <span className="text-sm font-semibold text-[#0B1F3B]">
+              <span className="text-sm font-semibold text-[#0B1F3B] dark:text-white">
                 {link.label}
               </span>
             </a>
