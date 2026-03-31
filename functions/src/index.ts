@@ -15,3 +15,6 @@ export { createJob, updateJob, updateJobStatus } from "./adminJobs";
 export { adminListApplications, updateApplicationStatus, addInterviewNotes, manageInterviewRounds } from "./adminApplications";
 export { listUsers, updateUserRole, toggleUserStatus, adminDashboard } from "./adminUsers";
 export { fraudAnalysis } from "./fraudDetection";
+
+// Scheduled
+export { scheduledBackup } from "./backup";

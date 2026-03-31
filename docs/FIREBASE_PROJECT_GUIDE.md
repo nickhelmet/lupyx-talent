@@ -616,6 +616,63 @@ volumes:
 
 ---
 
+## Rate Limiting
+
+### Patrón: Firestore-backed rate limiter
+
+```typescript
+// Guardar contadores por IP/usuario en Firestore
+// Documento: rate_limits/{endpoint}_{identifier}
+// Campos: count, resetAt, updatedAt
+// Lógica: si count >= max o window expiró → reset/deny
+```
+
+**Configuración por endpoint:**
+| Endpoint | Max requests | Window |
+|----------|-------------|--------|
+| submitApplication | 3 | 15 min |
+| listJobs (público) | 60 | 1 min |
+| Admin endpoints | 30 | 1 min |
+
+**Headers de respuesta:** `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+
+---
+
+## Input Validation
+
+- Sanitizar strings: strip HTML tags, entities, limit length
+- Validar email, phone, DNI con regex
+- Validar enums contra listas whitelist
+- PDF: verificar magic bytes (`%PDF`)
+- Nunca confiar en input del cliente — validar en Cloud Functions
+
+---
+
+## Backup y Recovery
+
+### Firestore scheduled export
+```typescript
+// Cloud Function scheduled: daily at 3am
+// Exporta todas las collections a gs://proyecto-backups/firestore/YYYY-MM-DD
+// Requiere: @google-cloud/firestore y permisos de export
+```
+
+**Retención:** 30 días. **RPO:** < 24 horas. **RTO:** < 1 hora.
+
+---
+
+## Ambientes
+
+| Ambiente | Firebase | Descripción |
+|----------|----------|-------------|
+| **Development** | Emulators (local) | Docker containers, datos de seed |
+| **Staging** | Preview channels | Automático en PRs, URL temporal |
+| **Production** | Proyecto principal | Dominio custom, App Check, rate limiting |
+
+Detección automática en `src/lib/environment.ts` basada en env vars.
+
+---
+
 ## Costos y Quotas
 
 ### Firebase Spark Plan (gratis)
