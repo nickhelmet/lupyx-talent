@@ -294,7 +294,19 @@ Antes de que el login funcione, configurar en Firebase Console:
 
 > **Sin esto, el popup de Google Sign-In falla con error de redirect_uri.** Es un paso fácil de olvidar.
 
-#### 3. Configurar pantalla de consentimiento OAuth (opcional)
+#### 3. Usar dominio custom en el popup de Google (importante)
+
+Por defecto, el popup de Google Sign-In muestra `tu-proyecto.firebaseapp.com`.
+Para que muestre tu dominio custom:
+
+```
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=tudominio.com    # ← NO firebaseapp.com
+```
+
+Esto funciona porque Firebase Hosting sirve `/__/auth/handler` en tu dominio custom.
+Sin este cambio, los usuarios ven "Ir a tu-proyecto.firebaseapp.com" en el popup.
+
+#### 4. Configurar pantalla de consentimiento OAuth (opcional)
 - Google Cloud Console → APIs & Services → OAuth consent screen
 - Agregar logo, nombre de app, links de privacidad
 - Solo necesario si querés personalizar lo que ven los usuarios en el popup
