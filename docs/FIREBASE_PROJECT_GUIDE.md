@@ -271,6 +271,34 @@ NEXT_PUBLIC_FIREBASE_APP_ID=
 
 ## Autenticación
 
+### Setup en Firebase Console
+
+Antes de que el login funcione, configurar en Firebase Console:
+
+#### 1. Habilitar proveedor Google
+- Firebase Console → Authentication → **Sign-in method** → **Get started**
+- Click **Google** → **Enable**
+- Nombre público del proyecto (lo que ven los usuarios en el popup)
+- Email de soporte (cuenta de admin)
+- **Save**
+
+#### 2. Agregar dominios autorizados
+- Firebase Console → Authentication → **Settings** → **Authorized domains**
+- Verificar que están:
+  - `tu-proyecto.web.app` (automático)
+  - `tu-proyecto.firebaseapp.com` (automático)
+- Agregar manualmente:
+  - `tudominio.com`
+  - `www.tudominio.com`
+  - `localhost` (para desarrollo)
+
+> **Sin esto, el popup de Google Sign-In falla con error de redirect_uri.** Es un paso fácil de olvidar.
+
+#### 3. Configurar pantalla de consentimiento OAuth (opcional)
+- Google Cloud Console → APIs & Services → OAuth consent screen
+- Agregar logo, nombre de app, links de privacidad
+- Solo necesario si querés personalizar lo que ven los usuarios en el popup
+
 ### Patrón: Firebase Auth + Cloud Functions verification
 
 **Frontend (hook):**
