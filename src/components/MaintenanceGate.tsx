@@ -54,10 +54,11 @@ function MaintenancePage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-[#0B1F3B] via-[#1F4E79] to-[#0B1F3B] px-4">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-white sm:text-5xl">
-          <span className="text-white">Lupyx</span>
-          <span className="text-[#2EC4B6]"> Talent</span>
-        </h1>
+        <img
+          src="/logo.jpg"
+          alt="Lupyx Talent"
+          className="mx-auto h-20 w-auto rounded-xl bg-white/10 p-2 backdrop-blur-sm sm:h-28"
+        />
 
         <div className="mx-auto mt-8 max-w-md">
           <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">

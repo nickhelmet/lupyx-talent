@@ -4,12 +4,13 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
           {/* Logo */}
-          <div>
-            <span className="text-xl font-bold">
-              <span className="text-[#0B1F3B]">Lupyx</span>
-              <span className="text-[#2EC4B6]"> Talent</span>
-            </span>
-            <p className="mt-1 text-sm text-[#1F4E79]/50">
+          <div className="flex items-center gap-3">
+            <img
+              src="/logo.jpg"
+              alt="Lupyx Talent"
+              className="h-10 w-auto"
+            />
+            <p className="text-sm text-[#1F4E79]/50">
               Conectando talento con oportunidades
             </p>
           </div>

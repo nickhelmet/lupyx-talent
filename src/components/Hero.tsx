@@ -50,7 +50,20 @@ export default function Hero() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
+            transition={{ delay: 0.1, duration: 0.6 }}
+            className="mb-8"
+          >
+            <img
+              src="/logo.jpg"
+              alt="Lupyx Talent"
+              className="mx-auto h-20 w-auto rounded-xl bg-white/10 p-2 backdrop-blur-sm sm:h-28"
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
             className="mb-6 inline-block rounded-full border border-[#2EC4B6]/30 bg-[#2EC4B6]/10 px-4 py-1.5 text-sm font-medium text-[#2EC4B6]"
           >
             Consultora de Reclutamiento y Selección
