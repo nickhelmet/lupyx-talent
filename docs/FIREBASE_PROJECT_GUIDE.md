@@ -785,6 +785,67 @@ Inmediatamente después del upgrade:
 
 ---
 
+## Deploy de Cloud Functions
+
+### Primer deploy
+```bash
+firebase deploy --only functions --project tu-proyecto
+```
+
+Si falla con error de permisos de build:
+```bash
+firebase deploy --only functions:nombreFuncion --force
+```
+
+### Invoker policy (Cloud Run)
+Cloud Functions v2 corren en Cloud Run. Por defecto requieren auth a nivel de infraestructura.
+Para que funcionen con Firebase Hosting rewrites:
+
+```bash
+# Hacer invocable públicamente (la auth la maneja tu código)
+gcloud functions add-invoker-policy-binding NOMBRE_FUNCION \
+  --region=us-central1 --member="allUsers" --project=tu-proyecto --gen2
+```
+
+> **Nota:** Esto permite invocación directa. Tu `authMiddleware` es la capa de seguridad real.
+
+### Índices Firestore
+Si una query usa `where()` + `orderBy()` en campos diferentes, Firestore necesita un índice compuesto:
+```bash
+gcloud firestore indexes composite create --project=tu-proyecto \
+  --collection-group=COLLECTION \
+  --field-config field-path=FIELD1,order=ascending \
+  --field-config field-path=FIELD2,order=descending
+```
+Los índices tardan 2-5 minutos en crearse.
+
+---
+
+## Seguridad post-deploy (OWASP Top 10)
+
+### Checklist mínima
+- [ ] **A01 Access Control:** Todos los endpoints admin verifican `isAdmin`
+- [ ] **A02 Crypto:** No hay secrets en código, API keys con restricciones
+- [ ] **A03 Injection:** Inputs sanitizados, no se construyen queries con user input
+- [ ] **A04 Insecure Design:** Rate limiting activo, maxInstances configurado
+- [ ] **A05 Misconfiguration:** Firestore/Storage rules deny-all, CORS restrictivo
+- [ ] **A06 Components:** `npm audit` limpio, Dependabot habilitado
+- [ ] **A07 Auth:** Firebase Auth maneja brute force, tokens expiran
+- [ ] **A08 Integrity:** Validation en todos los inputs, PDF magic bytes check
+- [ ] **A09 Logging:** Structured logs, alertas de errores
+- [ ] **A10 SSRF:** No hay fetch a URLs basadas en user input
+
+### Herramientas recomendadas
+- **OWASP ZAP:** Scan automatizado contra tu dominio
+- **npm audit:** Vulnerabilidades en dependencias
+- **Dependabot:** Alertas automáticas de seguridad en GitHub
+- **Firebase Security Rules simulator:** Verificar rules en emulator
+
+### Rate limiting post-Blaze (crítico)
+Con plan Blaze, cada invocación tiene costo potencial. Sin rate limiting, un atacante puede generar costos significativos. Implementar SIEMPRE antes de ir a producción.
+
+---
+
 ## Checklist de lanzamiento
 
 ### Pre-launch
