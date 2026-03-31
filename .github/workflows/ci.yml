@@ -19,6 +19,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npx tsc --noEmit
+      - run: npm test
       - name: Type check Cloud Functions
         run: cd functions && npm ci && npx tsc --noEmit
 

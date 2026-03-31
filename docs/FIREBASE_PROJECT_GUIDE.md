@@ -489,6 +489,56 @@ Patrón para proteger el sitio durante desarrollo sin necesidad de backend:
 
 ---
 
+## Analytics
+
+### Firebase Analytics setup
+
+```typescript
+// src/lib/analytics.ts
+import { getAnalytics, logEvent, isSupported } from "firebase/analytics";
+
+// Lazy init — only in browser, only if supported
+export async function trackEvent(name: string, params?: Record<string, string | number>) {
+  if (typeof window === "undefined") return;
+  if (!(await isSupported())) return;
+  const analytics = getAnalytics();
+  logEvent(analytics, name, params);
+}
+```
+
+**Eventos recomendados:** `page_view`, `login`, `sign_up`, item-specific views/actions, external link clicks.
+
+**Cookie consent:** Implementar banner opt-in antes de inicializar analytics (GDPR/LGPD).
+
+---
+
+## Testing
+
+### Vitest config
+
+```typescript
+// vitest.config.ts
+import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: "happy-dom",
+    include: ["src/**/*.test.{ts,tsx}"],
+  },
+});
+```
+
+**Estrategia:**
+1. Type definition tests (validar que los tipos son correctos)
+2. Utility function tests (pure functions)
+3. Component render tests (básicos, no snapshot)
+4. Cloud Functions tests (en `functions/` con su propio vitest)
+5. CI corre `npm test` en cada PR
+
+---
+
 ## CI/CD Pipeline
 
 ### GitHub Actions (referencia)
