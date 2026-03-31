@@ -343,6 +343,37 @@ config/settings       → configuración global (allowlist, etc.)
 
 ---
 
+## Admin Panel
+
+### Patrón: Layout protegido con sidebar
+
+```
+src/app/admin/
+├── layout.tsx       → Auth gate + sidebar + header
+├── page.tsx         → Dashboard con stats cards
+├── jobs/page.tsx    → CRUD de items principales
+├── items/page.tsx   → Gestión de subrecursos
+└── users/page.tsx   → Gestión de usuarios
+```
+
+**Principios:**
+1. Layout verifica auth y rol admin — redirige a login si no autenticado
+2. Sidebar con navegación, colapsable en mobile
+3. Cada página es un `"use client"` component con su propio estado
+4. Stats en dashboard usan counters denormalizados en Firestore (no queries costosos)
+5. Tablas con búsqueda, filtros y paginación
+6. Acciones destructivas requieren confirmación
+7. Dark mode en todos los componentes admin
+
+### User panel (candidatos)
+
+Ruta `/mi-cuenta` con:
+- Perfil (datos de Google + campos extra)
+- Historial de postulaciones con estado
+- Auth-gated pero sin rol admin
+
+---
+
 ## Firebase Storage
 
 **Patrón: upload via Cloud Function (no directo del cliente)**
