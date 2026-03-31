@@ -2,6 +2,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getCorsHeaders } from "./corsConfig";
 import { verifyAuth } from "./authMiddleware";
+import { rateLimit } from "./rateLimiter";
 
 export const adminListApplications = onRequest({ maxInstances: 5 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
@@ -11,6 +12,7 @@ export const adminListApplications = onRequest({ maxInstances: 5 }, async (req, 
 
   const user = await verifyAuth(req);
   if (!user?.isAdmin) { res.status(403).json({ error: "Forbidden" }); return; }
+  if (!(await rateLimit(req, res, "adminListApplications", user.uid))) return;
 
   const db = getFirestore();
   const snapshot = await db.collection("applications").orderBy("appliedAt", "desc").limit(100).get();
@@ -26,6 +28,7 @@ export const updateApplicationStatus = onRequest({ maxInstances: 3 }, async (req
 
   const user = await verifyAuth(req);
   if (!user?.isAdmin) { res.status(403).json({ error: "Forbidden" }); return; }
+  if (!(await rateLimit(req, res, "updateApplicationStatus", user.uid))) return;
 
   const { applicationId, status } = req.body;
   const validStatuses = ["PENDING", "REVIEWING", "INTERVIEW", "REJECTED", "ACCEPTED", "HIRED"];
@@ -49,6 +52,7 @@ export const addInterviewNotes = onRequest({ maxInstances: 3 }, async (req, res)
 
   const user = await verifyAuth(req);
   if (!user?.isAdmin) { res.status(403).json({ error: "Forbidden" }); return; }
+  if (!(await rateLimit(req, res, "addInterviewNotes", user.uid))) return;
 
   const { applicationId, scores, interviewMeta } = req.body;
   if (!applicationId) { res.status(400).json({ error: "Missing applicationId" }); return; }
@@ -69,6 +73,7 @@ export const manageInterviewRounds = onRequest({ maxInstances: 3 }, async (req, 
 
   const user = await verifyAuth(req);
   if (!user?.isAdmin) { res.status(403).json({ error: "Forbidden" }); return; }
+  if (!(await rateLimit(req, res, "manageInterviewRounds", user.uid))) return;
 
   const db = getFirestore();
   const { applicationId, roundId, ...data } = req.body;

@@ -1,6 +1,7 @@
 import { onRequest } from "firebase-functions/v2/https";
 import { getFirestore } from "firebase-admin/firestore";
 import { getCorsHeaders } from "./corsConfig";
+import { rateLimit } from "./rateLimiter";
 
 export const listJobs = onRequest({ maxInstances: 10 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
@@ -8,6 +9,7 @@ export const listJobs = onRequest({ maxInstances: 10 }, async (req, res) => {
 
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
   if (req.method !== "GET") { res.status(405).json({ error: "Method not allowed" }); return; }
+  if (!(await rateLimit(req, res, "listJobs"))) return;
 
   try {
     const db = getFirestore();

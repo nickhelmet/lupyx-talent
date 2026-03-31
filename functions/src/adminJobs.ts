@@ -2,6 +2,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getCorsHeaders } from "./corsConfig";
 import { verifyAuth } from "./authMiddleware";
+import { rateLimit } from "./rateLimiter";
 
 export const createJob = onRequest({ maxInstances: 3 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
@@ -11,6 +12,7 @@ export const createJob = onRequest({ maxInstances: 3 }, async (req, res) => {
 
   const user = await verifyAuth(req);
   if (!user?.isAdmin) { res.status(403).json({ error: "Forbidden" }); return; }
+  if (!(await rateLimit(req, res, "createJob", user.uid))) return;
 
   const { title, company, description, requirements, location, type, slug, linkedinUrl, tags } = req.body;
   if (!title || !company || !description) {
@@ -43,6 +45,7 @@ export const updateJob = onRequest({ maxInstances: 3 }, async (req, res) => {
 
   const user = await verifyAuth(req);
   if (!user?.isAdmin) { res.status(403).json({ error: "Forbidden" }); return; }
+  if (!(await rateLimit(req, res, "updateJob", user.uid))) return;
 
   const { jobId, ...updates } = req.body;
   if (!jobId) { res.status(400).json({ error: "Missing jobId" }); return; }
@@ -60,6 +63,7 @@ export const updateJobStatus = onRequest({ maxInstances: 3 }, async (req, res) =
 
   const user = await verifyAuth(req);
   if (!user?.isAdmin) { res.status(403).json({ error: "Forbidden" }); return; }
+  if (!(await rateLimit(req, res, "updateJobStatus", user.uid))) return;
 
   const { jobId, status } = req.body;
   if (!jobId || !["ACTIVE", "PAUSED", "CLOSED"].includes(status)) {
