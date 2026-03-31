@@ -435,6 +435,17 @@ Ruta `/mi-cuenta` con:
 - Historial de postulaciones con estado
 - Auth-gated pero sin rol admin
 
+### Índices en Firestore
+
+Firestore es NoSQL — no tiene JOINs ni queries SQL. Para compensar:
+
+1. **Denormalizar datos** que se leen juntos (ej: guardar `jobTitle` dentro de `application`)
+2. **Índices automáticos:** queries de un solo campo funcionan sin configuración
+3. **Índices compuestos:** queries con filtro + orden en campos distintos necesitan un índice manual
+4. **Limitaciones:** no hay `LIKE`, `contains` case-insensitive, ni full-text search nativo. Para búsqueda avanzada considerar Algolia o Typesense.
+
+Documentar todos los índices compuestos del proyecto en `ARCHITECTURE.md` para que cualquier dev pueda recrearlos.
+
 ---
 
 ## Firebase Storage
@@ -810,14 +821,31 @@ gcloud functions add-invoker-policy-binding NOMBRE_FUNCION \
 > **Nota:** Esto permite invocación directa. Tu `authMiddleware` es la capa de seguridad real.
 
 ### Índices Firestore
-Si una query usa `where()` + `orderBy()` en campos diferentes, Firestore necesita un índice compuesto:
+
+Firestore crea índices automáticos para queries de un solo campo. Pero queries compuestas (filtro + orden en campos distintos) necesitan un **índice compuesto** manual.
+
+**¿Cuándo se necesita?**
+| Query | Índice manual |
+|-------|:------------:|
+| `where("campo", "==", valor)` | No |
+| `orderBy("campo")` | No |
+| `where("campo1", "==", valor).orderBy("campo2")` | **Sí** |
+
+**Síntoma:** La función falla con `FAILED_PRECONDITION: The query requires an index`.
+
+**Solución 1 — Link del error:** El mensaje de error incluye un link a Firebase Console que crea el índice con un click.
+
+**Solución 2 — CLI:**
 ```bash
 gcloud firestore indexes composite create --project=tu-proyecto \
   --collection-group=COLLECTION \
   --field-config field-path=FIELD1,order=ascending \
   --field-config field-path=FIELD2,order=descending
 ```
-Los índices tardan 2-5 minutos en crearse.
+
+**Tiempos:** 2-5 minutos para crear. Una vez creado, funciona permanentemente.
+
+**Tip:** Probar todas las queries en el emulator local primero. El emulator no requiere índices, pero producción sí. Al deployar funciones nuevas con queries compuestas, tener el comando de creación de índice listo.
 
 ---
 
