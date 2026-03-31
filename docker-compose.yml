@@ -1,0 +1,25 @@
+services:
+  lupyx-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: lupyx-dev
+    ports:
+      - "3000:3000"   # Next.js dev server
+      - "4000:4000"   # Firebase Emulator UI
+      - "5001:5001"   # Cloud Functions emulator
+      - "8080:8080"   # Firestore emulator
+      - "9099:9099"   # Auth emulator
+      - "9199:9199"   # Storage emulator
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./docs:/app/docs
+      - ./firebase.json:/app/firebase.json
+      - ./firestore.rules:/app/firestore.rules
+      - ./storage.rules:/app/storage.rules
+      - ./.env.local:/app/.env.local
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_USE_EMULATORS=true
+    restart: unless-stopped

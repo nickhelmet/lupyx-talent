@@ -33,10 +33,11 @@ export default function Header() {
         <div className="flex h-16 items-center justify-between sm:h-20">
           {/* Logo */}
           <a href="#inicio" className="flex items-center gap-2">
-            <span className="text-xl font-bold sm:text-2xl">
-              <span className="text-[#0B1F3B]">Lupyx</span>
-              <span className="text-[#2EC4B6]"> Talent</span>
-            </span>
+            <img
+              src="/logo.jpg"
+              alt="Lupyx Talent"
+              className="h-10 w-auto sm:h-12"
+            />
           </a>
 
           {/* Desktop Nav */}

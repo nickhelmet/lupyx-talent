@@ -1,47 +1,33 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 
 const PREVIEW_KEY = "lupyx-preview-2026";
 const STORAGE_KEY = "lupyx_preview_access";
+
+function checkAccess(): boolean {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("preview") === PREVIEW_KEY) {
+    localStorage.setItem(STORAGE_KEY, "true");
+    window.history.replaceState({}, "", window.location.pathname);
+    return true;
+  }
+  return localStorage.getItem(STORAGE_KEY) === "true";
+}
+
+const subscribe = () => () => {};
 
 export default function MaintenanceGate({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [hasAccess, setHasAccess] = useState(false);
-  const [isChecking, setIsChecking] = useState(true);
-
-  useEffect(() => {
-    // Check URL param ?preview=KEY
-    const params = new URLSearchParams(window.location.search);
-    const previewParam = params.get("preview");
-
-    if (previewParam === PREVIEW_KEY) {
-      localStorage.setItem(STORAGE_KEY, "true");
-      // Clean URL
-      window.history.replaceState({}, "", window.location.pathname);
-      setHasAccess(true);
-      setIsChecking(false);
-      return;
-    }
-
-    // Check localStorage
-    if (localStorage.getItem(STORAGE_KEY) === "true") {
-      setHasAccess(true);
-    }
-
-    setIsChecking(false);
-  }, []);
-
-  if (isChecking) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0B1F3B]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#2EC4B6] border-t-transparent" />
-      </div>
-    );
-  }
+  const hasAccess = useSyncExternalStore(
+    subscribe,
+    () => checkAccess(),
+    () => false,
+  );
 
   if (!hasAccess) {
     return <MaintenancePage />;
@@ -54,10 +40,11 @@ function MaintenancePage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-[#0B1F3B] via-[#1F4E79] to-[#0B1F3B] px-4">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-white sm:text-5xl">
-          <span className="text-white">Lupyx</span>
-          <span className="text-[#2EC4B6]"> Talent</span>
-        </h1>
+        <img
+          src="/logo.jpg"
+          alt="Lupyx Talent"
+          className="mx-auto h-20 w-auto rounded-xl bg-white/10 p-2 backdrop-blur-sm sm:h-28"
+        />
 
         <div className="mx-auto mt-8 max-w-md">
           <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
