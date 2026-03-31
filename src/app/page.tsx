@@ -1,3 +1,4 @@
+import MaintenanceGate from "@/components/MaintenanceGate";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import ActiveSearches from "@/components/ActiveSearches";
@@ -8,7 +9,7 @@ import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
-    <>
+    <MaintenanceGate>
       <Header />
       <Hero />
       <ActiveSearches />
@@ -16,6 +17,6 @@ export default function Home() {
       <Testimonials />
       <Contact />
       <Footer />
-    </>
+    </MaintenanceGate>
   );
 }

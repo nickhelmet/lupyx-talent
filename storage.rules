@@ -1,0 +1,10 @@
+rules_version = '2';
+
+// All client access denied - file access only via Cloud Functions (Admin SDK)
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
