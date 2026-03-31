@@ -78,6 +78,17 @@ Los índices tardan 2-5 minutos en crearse. Una vez creados, funcionan permanent
 
 ---
 
+## Dependabot
+
+Configurado en `.github/dependabot.yml` para alertar vulnerabilidades automáticamente:
+- **npm (root):** dependencias frontend — semanal
+- **npm (functions/):** dependencias Cloud Functions — semanal
+- **GitHub Actions:** workflows — semanal
+
+PRs automáticos con label `devops`. Revisar y mergear patches de seguridad lo antes posible.
+
+---
+
 ## Rate Limiting
 
 Todas las Cloud Functions están protegidas con rate limiting basado en Firestore.
