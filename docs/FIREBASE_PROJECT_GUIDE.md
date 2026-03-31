@@ -747,12 +747,41 @@ Detección automática en `src/lib/environment.ts` basada en env vars.
 | Auth | 50k MAU |
 | Functions (Blaze) | 2M invocations/month, 400k GB-sec |
 
+### Spark vs Blaze
+
+| | Spark (gratis) | Blaze (pay-as-you-go) |
+|--|----------------|----------------------|
+| Tarjeta | No requiere | Requiere |
+| Cloud Functions | No disponible | Disponible |
+| Free tier | Sí | Mismo que Spark |
+| Costos extra | No | Solo si excedés free tier |
+| Scheduled functions | No | Sí |
+| Extensions | No | Sí |
+
+**Cloud Functions requiere Blaze.** Sin Blaze, solo podés deployar Hosting, Firestore rules y Storage rules.
+
+### Upgrade a Blaze (paso a paso)
+
+1. Firebase Console → **Usage & billing** → **Modify plan**
+2. Seleccionar **Blaze (pay as you go)**
+3. Agregar tarjeta de crédito/débito
+4. Confirmar
+
+### Configurar budget alerts
+
+Inmediatamente después del upgrade:
+
+1. Firebase Console → **Usage & billing** → **Budget alerts**
+2. Crear alerta a **$5 USD/mes** (te avisa por email)
+3. Opcional: segunda alerta a **$10 USD**
+4. El free tier cubre la gran mayoría de proyectos pequeños/medianos
+
 ### Estrategia de costos
-1. Empezar en Spark plan (gratis, sin tarjeta)
-2. Migrar a Blaze cuando necesites Cloud Functions
-3. Configurar budget alerts ($5, $10, $25)
-4. Poner maxInstances en cada Cloud Function
-5. Monitorear quotas en Firebase Console
+1. Empezar en Spark plan para desarrollo (Hosting + Firestore rules)
+2. Upgrade a Blaze cuando estés listo para deployar Cloud Functions
+3. Configurar budget alerts inmediatamente
+4. Poner `maxInstances` en cada Cloud Function (previene cost runaway)
+5. Monitorear quotas en Firebase Console mensualmente
 
 ---
 
