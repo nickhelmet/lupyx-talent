@@ -65,7 +65,15 @@ async function seed() {
 
   // Seed config/allowlist
   await db.doc("config/allowlist").set({
-    admin_emails: ["jm@lupyxtalent.com"],
+    allowed_emails: [
+      "jm@lupyxtalent.com",
+      "nico.nrc@gmail.com",
+      "josefina.marchese@gmail.com",
+    ],
+    admin_emails: [
+      "jm@lupyxtalent.com",
+      "nico.nrc@gmail.com",
+    ],
     blocked_emails: [],
     updated_at: new Date().toISOString(),
     updated_by: "seed",

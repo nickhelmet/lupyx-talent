@@ -8,7 +8,7 @@ export interface AuthenticatedUser {
   isAdmin: boolean;
 }
 
-let cachedAllowlist: { admins: string[]; blocked: string[]; ts: number } | null = null;
+let cachedAllowlist: { allowed: string[]; admins: string[]; blocked: string[]; ts: number } | null = null;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 async function getAllowlist() {
@@ -19,6 +19,7 @@ async function getAllowlist() {
   const doc = await db.doc("config/allowlist").get();
   const data = doc.data();
   cachedAllowlist = {
+    allowed: data?.allowed_emails ?? [],
     admins: data?.admin_emails ?? [],
     blocked: data?.blocked_emails ?? [],
     ts: Date.now(),
@@ -38,6 +39,11 @@ export async function verifyAuth(req: Request): Promise<AuthenticatedUser | null
 
     const allowlist = await getAllowlist();
     if (allowlist.blocked.includes(email)) return null;
+
+    // If allowed_emails list exists and is non-empty, restrict access
+    if (allowlist.allowed.length > 0 && !allowlist.allowed.includes(email)) {
+      return null;
+    }
 
     return {
       uid: decoded.uid,
