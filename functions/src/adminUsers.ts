@@ -2,6 +2,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getCorsHeaders } from "./corsConfig";
 import { verifyAuth } from "./authMiddleware";
+import { rateLimit } from "./rateLimiter";
 
 export const listUsers = onRequest({ maxInstances: 5 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
@@ -11,6 +12,7 @@ export const listUsers = onRequest({ maxInstances: 5 }, async (req, res) => {
 
   const user = await verifyAuth(req);
   if (!user?.isAdmin) { res.status(403).json({ error: "Forbidden" }); return; }
+  if (!(await rateLimit(req, res, "listUsers", user.uid))) return;
 
   const db = getFirestore();
   const snapshot = await db.collection("users").orderBy("createdAt", "desc").limit(100).get();
@@ -31,6 +33,7 @@ export const updateUserRole = onRequest({ maxInstances: 3 }, async (req, res) =>
   if (!uid || !["USER", "ADMIN"].includes(role)) {
     res.status(400).json({ error: "Invalid uid or role" }); return;
   }
+  if (!(await rateLimit(req, res, "updateUserRole", user.uid))) return;
 
   const db = getFirestore();
   await db.doc(`users/${uid}`).update({ role, updatedAt: FieldValue.serverTimestamp() });
@@ -62,6 +65,7 @@ export const toggleUserStatus = onRequest({ maxInstances: 3 }, async (req, res) 
   if (!uid || typeof isActive !== "boolean") {
     res.status(400).json({ error: "Invalid uid or isActive" }); return;
   }
+  if (!(await rateLimit(req, res, "toggleUserStatus", user.uid))) return;
 
   const db = getFirestore();
   await db.doc(`users/${uid}`).update({ isActive, updatedAt: FieldValue.serverTimestamp() });
@@ -88,6 +92,7 @@ export const adminDashboard = onRequest({ maxInstances: 3 }, async (req, res) =>
 
   const user = await verifyAuth(req);
   if (!user?.isAdmin) { res.status(403).json({ error: "Forbidden" }); return; }
+  if (!(await rateLimit(req, res, "adminDashboard", user.uid))) return;
 
   const db = getFirestore();
   const [jobsSnap, appsSnap, usersSnap] = await Promise.all([

@@ -2,6 +2,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import { getFirestore } from "firebase-admin/firestore";
 import { getCorsHeaders } from "./corsConfig";
 import { verifyAuth } from "./authMiddleware";
+import { rateLimit } from "./rateLimiter";
 
 export const fraudAnalysis = onRequest({ maxInstances: 3 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
@@ -11,6 +12,7 @@ export const fraudAnalysis = onRequest({ maxInstances: 3 }, async (req, res) => 
 
   const user = await verifyAuth(req);
   if (!user?.isAdmin) { res.status(403).json({ error: "Forbidden" }); return; }
+  if (!(await rateLimit(req, res, "fraudAnalysis", user.uid))) return;
 
   const { applicationId } = req.body;
   if (!applicationId) { res.status(400).json({ error: "Missing applicationId" }); return; }

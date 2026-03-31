@@ -869,8 +869,37 @@ gcloud firestore indexes composite create --project=tu-proyecto \
 - **Dependabot:** Alertas automáticas de seguridad en GitHub
 - **Firebase Security Rules simulator:** Verificar rules en emulator
 
-### Rate limiting post-Blaze (crítico)
-Con plan Blaze, cada invocación tiene costo potencial. Sin rate limiting, un atacante puede generar costos significativos. Implementar SIEMPRE antes de ir a producción.
+### Rate limiting en Cloud Functions (crítico para Blaze)
+
+Con plan Blaze, cada invocación tiene costo. Sin rate limiting, un atacante puede generar costos significativos. **Implementar ANTES de ir a producción.**
+
+**Patrón de implementación:**
+
+```typescript
+// rateLimiter.ts — Firestore-backed, por endpoint y por usuario/IP
+export async function rateLimit(req, res, endpoint, userId?) {
+  // 1. Identificar: userId si autenticado, IP si público
+  // 2. Leer contador de Firestore (rate_limits/{endpoint}_{identifier})
+  // 3. Si ventana expiró → resetear contador
+  // 4. Si excede límite → 429 + headers
+  // 5. Si OK → incrementar + permitir
+}
+```
+
+**Integración en cada función:**
+```typescript
+export const myFunction = onRequest(async (req, res) => {
+  // CORS, method check...
+  const user = await verifyAuth(req);
+  if (!user) { res.status(401)... }
+  if (!(await rateLimit(req, res, "myFunction", user.uid))) return; // ← esta línea
+  // ... lógica de negocio
+});
+```
+
+**Fail open:** Si el rate limiter falla (error de Firestore), permite el request pero loguea el error. Mejor servir que bloquear por un bug.
+
+**Costo del rate limiter:** Cada check = 1 read + 1 write de Firestore. Para endpoints de alto tráfico, considerar cache in-memory o Upstash Redis.
 
 ---
 

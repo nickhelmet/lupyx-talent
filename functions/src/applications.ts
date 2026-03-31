@@ -2,6 +2,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getCorsHeaders } from "./corsConfig";
 import { verifyAuth } from "./authMiddleware";
+import { rateLimit } from "./rateLimiter";
 
 export const submitApplication = onRequest({ maxInstances: 5 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
@@ -12,6 +13,7 @@ export const submitApplication = onRequest({ maxInstances: 5 }, async (req, res)
 
   const user = await verifyAuth(req);
   if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
+  if (!(await rateLimit(req, res, "submitApplication", user.uid))) return;
 
   try {
     const {
@@ -89,6 +91,7 @@ export const listApplications = onRequest({ maxInstances: 5 }, async (req, res) 
 
   const user = await verifyAuth(req);
   if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
+  if (!(await rateLimit(req, res, "listApplications", user.uid))) return;
 
   try {
     const db = getFirestore();

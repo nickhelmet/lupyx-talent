@@ -2,6 +2,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getCorsHeaders } from "./corsConfig";
 import { verifyAuth } from "./authMiddleware";
+import { rateLimit } from "./rateLimiter";
 
 export async function createNotification(
   userId: string,
@@ -28,6 +29,7 @@ export const getNotifications = onRequest({ maxInstances: 5 }, async (req, res) 
 
   const user = await verifyAuth(req);
   if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
+  if (!(await rateLimit(req, res, "getNotifications", user.uid))) return;
 
   const db = getFirestore();
   const snapshot = await db.collection("notifications")
@@ -48,6 +50,7 @@ export const markNotificationRead = onRequest({ maxInstances: 5 }, async (req, r
 
   const user = await verifyAuth(req);
   if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
+  if (!(await rateLimit(req, res, "markNotificationRead", user.uid))) return;
 
   const { notificationId } = req.body;
   if (!notificationId) { res.status(400).json({ error: "Missing notificationId" }); return; }

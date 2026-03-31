@@ -78,6 +78,28 @@ Los índices tardan 2-5 minutos en crearse. Una vez creados, funcionan permanent
 
 ---
 
+## Rate Limiting
+
+Todas las Cloud Functions están protegidas con rate limiting basado en Firestore.
+
+### Límites por endpoint
+
+| Endpoint | Max requests | Ventana | Identificador |
+|----------|-------------|---------|---------------|
+| `listJobs` (público) | 60 | 1 min | IP |
+| `submitApplication` | 3 | 15 min | userId |
+| `userProfile` | 20 | 1 min | userId |
+| `getNotifications` | 30 | 1 min | userId |
+| Admin endpoints | 10-30 | 1 min | userId |
+
+### Comportamiento
+- Request permitido → headers `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+- Request bloqueado → HTTP 429 con `retryAfter` en body
+- Error en rate limiter → fail open (permite request, loguea error)
+- Contadores almacenados en `rate_limits/` collection en Firestore
+
+---
+
 ## Auth Flow
 
 1. Usuario clickea "Iniciar sesión" → Google Sign-In popup
