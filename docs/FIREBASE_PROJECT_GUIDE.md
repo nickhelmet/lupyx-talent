@@ -385,11 +385,44 @@ firebase deploy --only hosting
 firebase deploy --only firestore:rules
 ```
 
-### Dominio custom
-1. En Firebase Console → Hosting → Add custom domain
-2. Configurar DNS según instrucciones (A records o CNAME)
-3. SSL se configura automáticamente
-4. Redirect www → dominio principal
+### Dominio custom (con Cloudflare)
+
+#### 1. Agregar dominio principal en Firebase
+- Firebase Console → Hosting → **Add custom domain** → `tudominio.com`
+- Firebase genera un TXT de verificación y registros A
+
+#### 2. Configurar DNS en Cloudflare
+Ir a Cloudflare Dashboard → tu dominio → DNS → Records:
+
+| Type | Name | Content | Proxy |
+|------|------|---------|-------|
+| TXT | `@` | `hosting-site=tu-proyecto-id` | — |
+| TXT | `_acme-challenge` | (valor de Firebase para SSL) | — |
+| A | `@` | (IP que da Firebase, ej: `199.36.158.100`) | **DNS only** |
+| CNAME | `www` | `tu-proyecto.web.app` | **DNS only** |
+
+> **IMPORTANTE:** El proxy de Cloudflare debe estar **APAGADO** (nube gris / "DNS only") en los registros A y CNAME. Si queda proxied (nube naranja), Firebase no puede generar el certificado SSL.
+
+#### 3. Agregar www en Firebase
+- Firebase Console → Hosting → **Add custom domain** → `www.tudominio.com`
+- Configurar como redirect a dominio principal
+
+#### 4. Configurar SSL en Cloudflare
+- Cloudflare → SSL/TLS → seleccionar **"Full"** o **"Full (strict)"**
+- **Nunca** usar "Flexible" con Firebase
+
+#### 5. Verificación
+- SSL tarda entre 5 min y 1 hora en generarse
+- Verificar con: `curl -sI https://tudominio.com | head -5`
+- Debe retornar HTTP 200 con headers de seguridad
+
+#### Tiempos de propagación
+| Registro | Propagación típica |
+|----------|-------------------|
+| TXT (verificación) | 1-5 minutos |
+| A (dominio principal) | 5-30 minutos |
+| CNAME (www) | 5-60 minutos |
+| SSL (Let's Encrypt) | 5 min - 1 hora |
 
 ---
 
