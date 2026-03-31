@@ -41,6 +41,43 @@ notifications/{notifId}  → Notificaciones
 config/allowlist         → admin_emails[], blocked_emails[]
 ```
 
+## Firestore Indexes
+
+Firestore crea índices automáticos para queries simples (un solo campo). Pero queries compuestas (filtro por un campo + orden por otro) requieren un **índice compuesto** creado manualmente.
+
+### Índices del proyecto
+
+| Collection | Campos | Tipo | Usado por |
+|-----------|--------|------|-----------|
+| `jobs` | `status` ASC + `postedDate` DESC | Compuesto | `listJobs` — filtra jobs activos ordenados por fecha |
+
+### Cómo crear un índice
+
+Si una Cloud Function falla con `FAILED_PRECONDITION: The query requires an index`, hay dos formas:
+
+**Opción 1 — Link del error:** El error incluye un link directo a Firebase Console que crea el índice con un click.
+
+**Opción 2 — CLI:**
+```bash
+gcloud firestore indexes composite create --project=lupyx-talent \
+  --collection-group=COLLECTION \
+  --field-config field-path=CAMPO1,order=ascending \
+  --field-config field-path=CAMPO2,order=descending
+```
+
+Los índices tardan 2-5 minutos en crearse. Una vez creados, funcionan permanentemente.
+
+### Cuándo se necesitan
+
+| Query | Índice necesario |
+|-------|-----------------|
+| `where("status", "==", "ACTIVE")` | No (automático) |
+| `orderBy("postedDate", "desc")` | No (automático) |
+| `where("status", "==", "ACTIVE").orderBy("postedDate", "desc")` | **Sí** (compuesto) |
+| `where("userId", "==", uid).orderBy("appliedAt", "desc")` | **Sí** (compuesto) |
+
+---
+
 ## Auth Flow
 
 1. Usuario clickea "Iniciar sesión" → Google Sign-In popup
