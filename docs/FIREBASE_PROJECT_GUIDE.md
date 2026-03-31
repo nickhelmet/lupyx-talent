@@ -4,9 +4,10 @@ Guía genérica y reutilizable para crear proyectos web con Firebase. Actualizad
 
 ## Índice
 
-1. [Arquitectura](#arquitectura)
-2. [Stack tecnológico](#stack-tecnológico)
-3. [Estructura del proyecto](#estructura-del-proyecto)
+1. [Branding](#branding)
+2. [Arquitectura](#arquitectura)
+3. [Stack tecnológico](#stack-tecnológico)
+4. [Estructura del proyecto](#estructura-del-proyecto)
 4. [Setup inicial](#setup-inicial)
 5. [Firebase Configuration](#firebase-configuration)
 6. [Autenticación](#autenticación)
@@ -21,6 +22,44 @@ Guía genérica y reutilizable para crear proyectos web con Firebase. Actualizad
 15. [Monitoreo y Alertas](#monitoreo-y-alertas)
 16. [Costos y Quotas](#costos-y-quotas)
 17. [Checklist de lanzamiento](#checklist-de-lanzamiento)
+
+---
+
+## Branding
+
+Cada proyecto necesita identidad visual definida antes de empezar a codear.
+
+### Logo
+- Colocar logo principal en `public/logo.jpg` (o .png/.svg)
+- Usar en: Header (navbar), Hero (prominente), Footer (pequeño), Maintenance page, Favicon, OG Image
+- Tamaños recomendados: Header 40-48px height, Hero 80-112px, Footer 40px, Favicon 32x32/192x192
+
+### Paleta de colores
+Definir en `globals.css` como variables CSS y Tailwind theme:
+
+```css
+@theme inline {
+  --color-brand-dark: #XXXXXX;     /* Texto fuerte, headers */
+  --color-brand-secondary: #XXXXXX; /* Texto secundario */
+  --color-brand-soft: #XXXXXX;      /* Backgrounds suaves, badges */
+  --color-brand-accent: #XXXXXX;    /* CTAs, highlights, links activos */
+  --color-brand-white: #FFFFFF;      /* Fondo principal */
+}
+```
+
+**Regla:** Nunca usar colores hex directos en componentes. Siempre referenciar las variables de tema para facilitar cambios globales.
+
+### Tipografía
+- **Fuente principal:** Definir en `layout.tsx` con `next/font/google`
+- **Recomendadas:** Geist (moderna, técnica), Inter (legible), DM Sans (amigable)
+- **Jerarquía:** H1 bold 4xl-7xl, H2 bold 3xl-4xl, body regular lg, small text sm
+- **Letter spacing:** -0.02em en títulos grandes para mayor impacto
+
+### Recursos
+- `public/logo.jpg` — Logo principal
+- `public/og-image.jpg` — Open Graph image (1200x630px)
+- `public/favicon.ico` — Favicon
+- Iconos: Lucide React (tree-shakeable, consistente)
 
 ---
 
