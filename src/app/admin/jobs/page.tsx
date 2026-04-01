@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Pause, Play, Plus, Loader2 } from "lucide-react";
-import { getFirebaseAuth } from "@/lib/firebase";
-import { getApiBase } from "@/lib/environment";
+import { adminFetch } from "@/services/adminApi";
 import type { Job } from "@/types";
 
 const statusStyles: Record<string, string> = {
@@ -11,22 +10,6 @@ const statusStyles: Record<string, string> = {
   PAUSED: "bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400",
   CLOSED: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
 };
-
-async function adminFetch(endpoint: string, options?: RequestInit) {
-  const auth = getFirebaseAuth();
-  const user = auth.currentUser;
-  if (!user) throw new Error("Not authenticated");
-  const token = await user.getIdToken();
-  const res = await fetch(`${getApiBase()}/${endpoint}`, {
-    ...options,
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, ...options?.headers },
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(err.error || "Request failed");
-  }
-  return res.json();
-}
 
 export default function AdminJobs() {
   const [jobs, setJobs] = useState<Job[]>([]);

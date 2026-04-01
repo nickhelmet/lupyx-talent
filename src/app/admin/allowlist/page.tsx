@@ -2,26 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Trash2, Shield, ShieldCheck, Loader2 } from "lucide-react";
-import { getFirebaseAuth } from "@/lib/firebase";
-import { getApiBase } from "@/lib/environment";
+import { adminFetch } from "@/services/adminApi";
 
 interface AllowlistData {
   allowed_emails: string[];
   admin_emails: string[];
   blocked_emails: string[];
-}
-
-async function apiFetch(endpoint: string, options?: RequestInit) {
-  const auth = getFirebaseAuth();
-  const user = auth.currentUser;
-  if (!user) throw new Error("Not authenticated");
-  const token = await user.getIdToken();
-  const res = await fetch(`${getApiBase()}/${endpoint}`, {
-    ...options,
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, ...options?.headers },
-  });
-  if (!res.ok) throw new Error((await res.json()).error || "Request failed");
-  return res.json();
 }
 
 export default function AllowlistPage() {
@@ -32,7 +18,7 @@ export default function AllowlistPage() {
 
   async function loadData() {
     try {
-      const result = await apiFetch("getAllowlist");
+      const result = await adminFetch("getAllowlist");
       setData(result);
     } catch { /* ignore */ } finally {
       setLoading(false);
@@ -48,7 +34,7 @@ export default function AllowlistPage() {
     if (!newEmail.trim()) return;
     setAdding(true);
     try {
-      await apiFetch("addAllowlistEmail", {
+      await adminFetch("addAllowlistEmail", {
         method: "POST",
         body: JSON.stringify({ email: newEmail.trim().toLowerCase(), list }),
       });
@@ -61,7 +47,7 @@ export default function AllowlistPage() {
 
   async function removeEmail(email: string, list: string) {
     try {
-      await apiFetch("removeAllowlistEmail", {
+      await adminFetch("removeAllowlistEmail", {
         method: "POST",
         body: JSON.stringify({ email, list }),
       });
