@@ -82,15 +82,13 @@ export const submitApplication = onRequest({ maxInstances: 1 }, async (req, res)
         res.status(400).json({ error: "File too large (max 5MB)" }); return;
       }
 
-      // Check for suspicious PDF content
+      // Log suspicious PDF content (monitor mode — don't block legitimate PDFs)
       const content = buffer.toString("latin1");
       if (content.includes("/JavaScript") || content.includes("/JS ")) {
-        console.warn(`Rejected PDF upload: contains JavaScript from ${user.email}`);
-        res.status(400).json({ error: "PDF contains potentially malicious content" }); return;
+        console.warn(`PDF upload warning: contains JavaScript strings from ${user.email}`);
       }
       if (content.includes("/OpenAction") || content.includes("/AA ")) {
-        console.warn(`Rejected PDF upload: contains auto-actions from ${user.email}`);
-        res.status(400).json({ error: "PDF contains potentially malicious content" }); return;
+        console.warn(`PDF upload warning: contains auto-action strings from ${user.email}`);
       }
 
       cvHash = createHash("sha256").update(buffer).digest("hex");
