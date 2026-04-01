@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Menu, X } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import UserMenu from "./UserMenu";
 import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
@@ -15,8 +15,7 @@ const navLinks = [
 ];
 
 export default function Header() {
-  const { user, loginWithGoogle, logout } = useAuth();
-  const router = useRouter();
+  const { user, loginWithGoogle } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -58,27 +57,7 @@ export default function Header() {
             ))}
             <ThemeToggle />
             {user ? (
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => router.push("/admin")}
-                  aria-label="Panel admin"
-                  className="cursor-pointer"
-                >
-                  <img
-                    src={user.photoURL || ""}
-                    alt="Mi cuenta"
-                    className="h-8 w-8 rounded-full transition-all hover:ring-2 hover:ring-[#2EC4B6]"
-                    referrerPolicy="no-referrer"
-                  />
-                </button>
-                <button
-                  onClick={logout}
-                  className="text-[#1F4E79]/60 transition-colors hover:text-red-500 dark:text-gray-400"
-                  aria-label="Cerrar sesión"
-                >
-                  <LogOut className="h-4 w-4" />
-                </button>
-              </div>
+              <UserMenu />
             ) : (
               <button
                 onClick={loginWithGoogle}

@@ -16,6 +16,15 @@ const statusLabels: Record<string, string> = {
   HIRED: "Contratado",
 };
 
+const statusColors: Record<string, string> = {
+  PENDING: "bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400",
+  REVIEWING: "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400",
+  INTERVIEW: "bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400",
+  ACCEPTED: "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400",
+  REJECTED: "bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400",
+  HIRED: "bg-[#2EC4B6]/10 text-[#2EC4B6]",
+};
+
 export default function MiCuenta() {
   const { user, loading, logout, loginWithGoogle } = useAuth();
   const router = useRouter();
@@ -92,16 +101,32 @@ export default function MiCuenta() {
               No te has postulado a ninguna búsqueda todavía.
             </p>
           ) : (
-            <div className="mt-4 space-y-3">
+            <div className="mt-4 space-y-4">
               {apps.map((app) => (
-                <div key={app.id} className="flex items-center justify-between rounded-xl border border-gray-100 p-3 dark:border-white/10">
-                  <div>
-                    <p className="text-sm font-medium text-[#0B1F3B] dark:text-white">{app.jobTitle}</p>
-                    <p className="text-xs text-[#1F4E79]/50 dark:text-gray-500">{app.jobCompany}</p>
+                <div key={app.id} className="rounded-xl border border-gray-100 p-4 dark:border-white/10">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="font-medium text-[#0B1F3B] dark:text-white">{app.jobTitle}</p>
+                      <p className="text-sm text-[#1F4E79]/60 dark:text-gray-400">{app.jobCompany}</p>
+                    </div>
+                    <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${statusColors[app.status] || "bg-gray-100 text-gray-500"}`}>
+                      {statusLabels[app.status] || app.status}
+                    </span>
                   </div>
-                  <span className="rounded-full bg-[#2EC4B6]/10 px-3 py-1 text-xs font-semibold text-[#2EC4B6]">
-                    {statusLabels[app.status] || app.status}
-                  </span>
+                  <div className="mt-3 flex gap-4 text-xs text-[#1F4E79]/50 dark:text-gray-500">
+                    {app.appliedAt && (
+                      <span>Postulado: {typeof app.appliedAt === "object" && "_seconds" in (app.appliedAt as Record<string, unknown>)
+                        ? new Date((app.appliedAt as unknown as { _seconds: number })._seconds * 1000).toLocaleDateString("es-AR")
+                        : new Date(app.appliedAt as string).toLocaleDateString("es-AR")
+                      }</span>
+                    )}
+                  </div>
+                  {app.interviewMeta?.notes && (
+                    <div className="mt-3 rounded-lg bg-[#2EC4B6]/5 p-3">
+                      <p className="text-xs font-semibold text-[#2EC4B6]">Comentario del reclutador</p>
+                      <p className="mt-1 text-sm text-[#1F4E79]/80 dark:text-gray-300">{app.interviewMeta.notes}</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
