@@ -7,6 +7,7 @@ import { verifyAuth } from "./authMiddleware";
 import { rateLimit } from "./rateLimiter";
 import { createNotification } from "./notifications";
 import { sanitizeString, validatePhone, validateDNI, validateEducationLevel } from "./validation";
+import { sendApplicationConfirmation, sendNewApplicationAlert } from "./email";
 
 export const submitApplication = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
@@ -131,7 +132,7 @@ export const submitApplication = onRequest({ maxInstances: 1 }, async (req, res)
 
     const ref = await db.collection("applications").add(application);
 
-    // Notify admins
+    // Notify admins + send emails
     try {
       const allowlistDoc = await db.doc("config/allowlist").get();
       const admins: string[] = allowlistDoc.data()?.admin_emails ?? [];
@@ -144,8 +145,12 @@ export const submitApplication = onRequest({ maxInstances: 1 }, async (req, res)
           `${firstName} ${lastName} se postuló a ${jobData.title}`,
         );
       }
+      // Email: confirm to candidate
+      await sendApplicationConfirmation(user.email, firstName, jobData.title, jobData.company);
+      // Email: alert admins
+      await sendNewApplicationAlert(admins, `${firstName} ${lastName}`, user.email, jobData.title);
     } catch (notifError) {
-      console.error("Failed to notify admins:", notifError);
+      console.error("Failed to send notifications/emails:", notifError);
     }
 
     res.status(201).json({ id: ref.id, message: "Application submitted successfully" });
