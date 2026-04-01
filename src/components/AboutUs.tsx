@@ -71,14 +71,36 @@ export default function AboutUs() {
               generales, priorizando la calidad de la experiencia del candidato y
               el alineamiento con el negocio.
             </p>
-            <div className="mt-8 flex items-center gap-6">
+            <div className="mt-6 flex gap-8">
+              <div>
+                <p className="text-2xl font-bold text-[#2EC4B6]">IT & General</p>
+                <p className="text-xs text-[#1F4E79]/70 dark:text-gray-400">Perfiles</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#2EC4B6]">LATAM</p>
+                <p className="text-xs text-[#1F4E79]/70 dark:text-gray-400">Alcance</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#2EC4B6]">USD</p>
+                <p className="text-xs text-[#1F4E79]/70 dark:text-gray-400">Compensación</p>
+              </div>
+            </div>
+            <div className="mt-8 flex items-center gap-4">
               <a
                 href="https://www.linkedin.com/company/lupyx-talent/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full bg-[#0B1F3B] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#1F4E79]"
+                className="rounded-full bg-[#0B1F3B] px-6 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#1F4E79] hover:scale-[1.02] active:scale-[0.98]"
               >
                 Conocenos en LinkedIn
+              </a>
+              <a
+                href="https://www.instagram.com/lupyx.talent"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full border border-[#1F4E79]/20 px-6 py-2.5 text-sm font-semibold text-[#1F4E79] transition-all hover:border-[#2EC4B6] hover:text-[#2EC4B6] dark:border-white/20 dark:text-gray-300"
+              >
+                Instagram
               </a>
             </div>
           </motion.div>

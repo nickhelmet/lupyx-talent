@@ -19,25 +19,25 @@ export default function Footer() {
           <nav className="flex gap-6">
             <a
               href="#inicio"
-              className="text-sm text-[#1F4E79]/60 transition-colors hover:text-[#2EC4B6]"
+              className="text-sm text-[#1F4E79]/70 transition-colors hover:text-[#2EC4B6]"
             >
               Inicio
             </a>
             <a
               href="#busquedas"
-              className="text-sm text-[#1F4E79]/60 transition-colors hover:text-[#2EC4B6]"
+              className="text-sm text-[#1F4E79]/70 transition-colors hover:text-[#2EC4B6]"
             >
               Búsquedas
             </a>
             <a
               href="#nosotros"
-              className="text-sm text-[#1F4E79]/60 transition-colors hover:text-[#2EC4B6]"
+              className="text-sm text-[#1F4E79]/70 transition-colors hover:text-[#2EC4B6]"
             >
               Nosotros
             </a>
             <a
               href="#contacto"
-              className="text-sm text-[#1F4E79]/60 transition-colors hover:text-[#2EC4B6]"
+              className="text-sm text-[#1F4E79]/70 transition-colors hover:text-[#2EC4B6]"
             >
               Contacto
             </a>
