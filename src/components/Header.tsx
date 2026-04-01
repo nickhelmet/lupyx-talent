@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -15,6 +16,7 @@ const navLinks = [
 
 export default function Header() {
   const { user, loginWithGoogle, logout } = useAuth();
+  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -57,14 +59,18 @@ export default function Header() {
             <ThemeToggle />
             {user ? (
               <div className="flex items-center gap-3">
-                <a href="/admin" aria-label="Panel admin">
+                <button
+                  onClick={() => router.push("/admin")}
+                  aria-label="Panel admin"
+                  className="cursor-pointer"
+                >
                   <img
                     src={user.photoURL || ""}
                     alt="Mi cuenta"
                     className="h-8 w-8 rounded-full transition-all hover:ring-2 hover:ring-[#2EC4B6]"
                     referrerPolicy="no-referrer"
                   />
-                </a>
+                </button>
                 <button
                   onClick={logout}
                   className="text-[#1F4E79]/60 transition-colors hover:text-red-500 dark:text-gray-400"
@@ -76,7 +82,7 @@ export default function Header() {
             ) : (
               <button
                 onClick={loginWithGoogle}
-                className="rounded-full bg-[#2EC4B6] px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-[#26a89c] hover:shadow-lg"
+                className="cursor-pointer rounded-full bg-[#2EC4B6] px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-[#26a89c] hover:shadow-lg"
               >
                 Iniciar sesión
               </button>
