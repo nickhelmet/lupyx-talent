@@ -84,9 +84,14 @@ export default function PostularClient() {
     let cvBase64 = "";
     try {
       const buffer = await cvFile.arrayBuffer();
-      cvBase64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+      const bytes = new Uint8Array(buffer);
+      let binary = "";
+      for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      cvBase64 = btoa(binary);
     } catch {
-      setError("Error al procesar el archivo");
+      setError("Error al procesar el archivo. Verificá que sea un PDF válido.");
       setSubmitting(false);
       return;
     }
