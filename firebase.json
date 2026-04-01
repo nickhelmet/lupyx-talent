@@ -53,6 +53,9 @@
       { "source": "/api/admin/users", "function": "listUsers" },
       { "source": "/api/admin/users/role", "function": "updateUserRole" },
       { "source": "/api/admin/users/status", "function": "toggleUserStatus" },
+      { "source": "/api/admin/allowlist", "function": "getAllowlist" },
+      { "source": "/api/admin/allowlist/add", "function": "addAllowlistEmail" },
+      { "source": "/api/admin/allowlist/remove", "function": "removeAllowlistEmail" },
       { "source": "**", "destination": "/index.html" }
     ]
   },
