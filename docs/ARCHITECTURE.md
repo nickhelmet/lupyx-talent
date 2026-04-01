@@ -78,6 +78,29 @@ Los índices tardan 2-5 minutos en crearse. Una vez creados, funcionan permanent
 
 ---
 
+## Tests
+
+### Frontend (10 tests)
+```bash
+npm test   # desde raíz
+```
+- Type definitions: 5 tests (enums, interfaces)
+- Environment: 3 tests (emulator detection, API base URL)
+- Analytics: 2 tests (track functions exist, callable sin Firebase)
+
+### Cloud Functions (29 tests)
+```bash
+cd functions && npx vitest run
+```
+- Validation: 20 tests (sanitize, email, phone, DNI, statuses, PDF magic bytes)
+- CORS: 6 tests (allowed origins, headers, unknown domains)
+- Rate limiter: 3 tests (config, limits)
+
+### CI
+Ambos test suites corren en cada PR: `npm test` (frontend) + `npx vitest run` (functions).
+
+---
+
 ## Dependabot
 
 Configurado en `.github/dependabot.yml` para alertar vulnerabilidades automáticamente:

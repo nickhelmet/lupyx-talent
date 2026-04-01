@@ -5,6 +5,7 @@ import { createHash } from "crypto";
 import { getCorsHeaders } from "./corsConfig";
 import { verifyAuth } from "./authMiddleware";
 import { rateLimit } from "./rateLimiter";
+import { createNotification } from "./notifications";
 
 export const submitApplication = onRequest({ maxInstances: 5 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
@@ -60,11 +61,24 @@ export const submitApplication = onRequest({ maxInstances: 5 }, async (req, res)
 
       // Validate PDF magic bytes
       if (buffer.length < 4 || buffer.subarray(0, 4).toString() !== "%PDF") {
+        console.warn(`Rejected PDF upload: invalid magic bytes from ${user.email}`);
         res.status(400).json({ error: "Invalid PDF file" }); return;
       }
 
       if (buffer.length > 5 * 1024 * 1024) {
+        console.warn(`Rejected PDF upload: too large (${buffer.length} bytes) from ${user.email}`);
         res.status(400).json({ error: "File too large (max 5MB)" }); return;
+      }
+
+      // Check for suspicious PDF content
+      const content = buffer.toString("latin1");
+      if (content.includes("/JavaScript") || content.includes("/JS ")) {
+        console.warn(`Rejected PDF upload: contains JavaScript from ${user.email}`);
+        res.status(400).json({ error: "PDF contains potentially malicious content" }); return;
+      }
+      if (content.includes("/OpenAction") || content.includes("/AA ")) {
+        console.warn(`Rejected PDF upload: contains auto-actions from ${user.email}`);
+        res.status(400).json({ error: "PDF contains potentially malicious content" }); return;
       }
 
       cvHash = createHash("sha256").update(buffer).digest("hex");
@@ -105,6 +119,23 @@ export const submitApplication = onRequest({ maxInstances: 5 }, async (req, res)
     };
 
     const ref = await db.collection("applications").add(application);
+
+    // Notify admins
+    try {
+      const allowlistDoc = await db.doc("config/allowlist").get();
+      const admins: string[] = allowlistDoc.data()?.admin_emails ?? [];
+      const usersSnap = await db.collection("users").where("email", "in", admins.slice(0, 10)).get();
+      for (const adminDoc of usersSnap.docs) {
+        await createNotification(
+          adminDoc.id,
+          "NEW_APPLICATION",
+          "Nueva postulación",
+          `${firstName} ${lastName} se postuló a ${jobData.title}`,
+        );
+      }
+    } catch (notifError) {
+      console.error("Failed to notify admins:", notifError);
+    }
 
     res.status(201).json({ id: ref.id, message: "Application submitted successfully" });
   } catch (error) {
