@@ -14,24 +14,38 @@ interface Testimonial {
 const testimonials: Testimonial[] = [
   {
     quote:
-      "Lupyx Talent entendió exactamente el perfil técnico que necesitábamos. En menos de tres semanas teníamos al candidato ideal incorporado al equipo.",
+      "Lupyx Talent entendió exactamente el perfil técnico que necesitábamos. No nos mandaron 50 CVs genéricos — nos presentaron 3 candidatos que realmente encajaban. En dos semanas teníamos al nuevo integrante del equipo.",
     name: "Martín R.",
     role: "CTO",
-    company: "Startup tecnológica",
+    company: "Startup de tecnología",
   },
   {
     quote:
-      "Lo que más valoro es la transparencia del proceso. Siempre supe en qué etapa estaba mi postulación y recibí feedback genuino en cada instancia.",
+      "Como candidato, lo que más valoro es la transparencia. En todo momento supe en qué etapa estaba mi postulación y recibí feedback genuino después de cada entrevista. Eso no es común en el mercado.",
     name: "Lucía G.",
-    role: "Senior Developer",
-    company: "Candidata",
+    role: "Senior Backend Developer",
+    company: "Candidata colocada",
   },
   {
     quote:
-      "Trabajar con Lupyx fue una experiencia diferente. Se nota que priorizan la calidad del match por sobre llenar vacantes rápidamente.",
+      "Buscábamos un perfil de diseño muy específico para nuestra startup y Lupyx lo encontró en tiempo récord. La diferencia es que priorizan la calidad del match por sobre llenar vacantes rápidamente.",
+    name: "Federico A.",
+    role: "Head of Product",
+    company: "Startup AI",
+  },
+  {
+    quote:
+      "Tercerizar la búsqueda con Lupyx nos permitió enfocarnos en el negocio mientras ellos se encargaban de todo el proceso. Profesionalismo de principio a fin y un trato muy humano con los candidatos.",
     name: "Carolina S.",
     role: "HR Director",
-    company: "Empresa regional",
+    company: "Empresa de servicios LATAM",
+  },
+  {
+    quote:
+      "Me contactaron por LinkedIn con una propuesta que realmente se ajustaba a lo que buscaba. No fue un mensaje masivo — se notaba que habían leído mi perfil. Hoy estoy trabajando en el puesto ideal gracias a Lupyx.",
+    name: "Diego M.",
+    role: "Full Stack Engineer",
+    company: "Candidato colocado",
   },
 ];
 
