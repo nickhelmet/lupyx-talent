@@ -88,11 +88,12 @@ npm test   # desde raíz
 - Environment: 3 tests (emulator detection, API base URL)
 - Analytics: 2 tests (track functions exist, callable sin Firebase)
 
-### Cloud Functions (29 tests)
+### Cloud Functions (44 tests)
 ```bash
 cd functions && npx vitest run
 ```
 - Validation: 20 tests (sanitize, email, phone, DNI, statuses, PDF magic bytes)
+- Validation integration: 15 tests (XSS, NoSQL injection, overflow, enum whitelist, score clamping, URL/date validation)
 - CORS: 6 tests (allowed origins, headers, unknown domains)
 - Rate limiter: 3 tests (config, limits)
 
