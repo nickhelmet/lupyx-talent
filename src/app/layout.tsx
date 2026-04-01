@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/hooks/useAuth";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -105,8 +106,13 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-white text-[#0B1F3B] dark:bg-[#0a0f1a] dark:text-gray-100">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-[#2EC4B6] focus:px-4 focus:py-2 focus:text-sm focus:text-white">
+          Saltar al contenido
+        </a>
         <ThemeScript />
-        <AuthProvider>{children}</AuthProvider>
+        <ErrorBoundary>
+          <AuthProvider>{children}</AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
