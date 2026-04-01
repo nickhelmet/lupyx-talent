@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Search, Shield, ShieldOff, Loader2 } from "lucide-react";
-import { getFirebaseAuth } from "@/lib/firebase";
-import { getApiBase } from "@/lib/environment";
+import { adminFetch } from "@/services/adminApi";
 
 interface UserItem {
   uid: string;
@@ -13,19 +12,6 @@ interface UserItem {
   role?: string;
   isActive?: boolean;
   createdAt?: string;
-}
-
-async function adminFetch(endpoint: string, options?: RequestInit) {
-  const auth = getFirebaseAuth();
-  const user = auth.currentUser;
-  if (!user) throw new Error("Not authenticated");
-  const token = await user.getIdToken();
-  const res = await fetch(`${getApiBase()}/${endpoint}`, {
-    ...options,
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, ...options?.headers },
-  });
-  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "Request failed");
-  return res.json();
 }
 
 export default function AdminUsers() {

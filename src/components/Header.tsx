@@ -57,12 +57,14 @@ export default function Header() {
             <ThemeToggle />
             {user ? (
               <div className="flex items-center gap-3">
-                <img
-                  src={user.photoURL || ""}
-                  alt=""
-                  className="h-8 w-8 rounded-full"
-                  referrerPolicy="no-referrer"
-                />
+                <a href="/admin" aria-label="Panel admin">
+                  <img
+                    src={user.photoURL || ""}
+                    alt="Mi cuenta"
+                    className="h-8 w-8 rounded-full transition-all hover:ring-2 hover:ring-[#2EC4B6]"
+                    referrerPolicy="no-referrer"
+                  />
+                </a>
                 <button
                   onClick={logout}
                   className="text-[#1F4E79]/60 transition-colors hover:text-red-500 dark:text-gray-400"

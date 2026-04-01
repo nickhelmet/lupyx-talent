@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Search, Loader2 } from "lucide-react";
-import { getFirebaseAuth } from "@/lib/firebase";
-import { getApiBase } from "@/lib/environment";
+import { adminFetch } from "@/services/adminApi";
 import type { Application, ApplicationStatus } from "@/types";
 
 const statusStyles: Record<string, string> = {
@@ -16,19 +15,6 @@ const statusStyles: Record<string, string> = {
 };
 
 const statusOptions: ApplicationStatus[] = ["PENDING", "REVIEWING", "INTERVIEW", "ACCEPTED", "REJECTED", "HIRED"];
-
-async function adminFetch(endpoint: string, options?: RequestInit) {
-  const auth = getFirebaseAuth();
-  const user = auth.currentUser;
-  if (!user) throw new Error("Not authenticated");
-  const token = await user.getIdToken();
-  const res = await fetch(`${getApiBase()}/${endpoint}`, {
-    ...options,
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, ...options?.headers },
-  });
-  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "Request failed");
-  return res.json();
-}
 
 export default function AdminApplications() {
   const [apps, setApps] = useState<Application[]>([]);

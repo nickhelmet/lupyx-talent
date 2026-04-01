@@ -1,25 +1,34 @@
 "use client";
 
-import { useSyncExternalStore, useCallback } from "react";
+import { useSyncExternalStore } from "react";
 
 const CONSENT_KEY = "lupyx_cookie_consent";
 
-const subscribe = () => () => {};
+const listeners = new Set<() => void>();
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
 
 function getSnapshot(): boolean {
   if (typeof window === "undefined") return false;
   return !localStorage.getItem(CONSENT_KEY);
 }
 
+function notify() {
+  listeners.forEach((l) => l());
+}
+
 export default function CookieConsent() {
   const show = useSyncExternalStore(subscribe, getSnapshot, () => false);
 
-  const accept = useCallback(() => {
-    localStorage.setItem(CONSENT_KEY, "accepted");
-    window.dispatchEvent(new Event("storage"));
-  }, []);
-
   if (!show) return null;
+
+  function accept() {
+    localStorage.setItem(CONSENT_KEY, "accepted");
+    notify();
+  }
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white p-4 shadow-lg dark:border-white/10 dark:bg-[#0d1520]">

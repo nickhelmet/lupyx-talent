@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Briefcase, FileText, Users, Clock, Loader2 } from "lucide-react";
-import { getFirebaseAuth } from "@/lib/firebase";
-import { getApiBase } from "@/lib/environment";
+import { adminFetch } from "@/services/adminApi";
 
 interface DashboardStats {
   activeJobs: number;
@@ -17,24 +16,18 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function load() {
+    let cancelled = false;
+    const timer = setTimeout(async () => {
       try {
-        const auth = getFirebaseAuth();
-        const user = auth.currentUser;
-        if (!user) return;
-        const token = await user.getIdToken();
-        const res = await fetch(`${getApiBase()}/adminDashboard`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) setStats(await res.json());
+        const data = await adminFetch("adminDashboard");
+        if (!cancelled) setStats(data);
       } catch {
         // Fallback to zeros
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
-    }
-    const timer = setTimeout(load, 500); // Wait for auth
-    return () => clearTimeout(timer);
+    }, 500);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, []);
 
   const cards = [
