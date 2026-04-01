@@ -114,7 +114,14 @@ export default function PostularClient() {
       setSuccess(true);
       track.jobApplyComplete(slug);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al enviar postulación");
+      const msg = err instanceof Error ? err.message : "Error al enviar postulación";
+      const friendlyMessages: Record<string, string> = {
+        "You have already applied to this job": "Ya te postulaste a esta búsqueda. Podés ver el estado de tu postulación en Mi cuenta.",
+        "Job not found or not active": "Esta búsqueda ya no está activa.",
+        "Invalid PDF file": "El archivo no es un PDF válido.",
+        "File too large (max 5MB)": "El archivo supera el tamaño máximo de 5MB.",
+      };
+      setError(friendlyMessages[msg] || msg);
     } finally {
       setSubmitting(false);
     }
