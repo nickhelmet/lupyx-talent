@@ -1106,13 +1106,37 @@ Deshabilitar: BigQuery, DataPlex, FCM, App Distribution, Remote Config, etc.
 
 ### Post-launch
 - [ ] Verificar uptime y latency
-- [ ] Verificar analytics recolecta datos
+- [ ] Verificar analytics recolecta datos (24-48hs)
 - [ ] Monitorear costos en primeras 48hs (Firebase Console → Usage)
 - [ ] Verificar rate limiting funciona (`curl` directo → 403 App Check)
 - [ ] Probar flujo completo como usuario nuevo
 - [ ] Probar Google Sign-In en mobile
 - [ ] Verificar dark mode en todos los browsers
+- [ ] Verificar sitemap dinámico en Search Console
 
 ---
 
-*Última actualización: Marzo 2026 — basada en implementación de Lupyx Talent*
+## Polish & extras
+
+### Cookie Consent (GDPR/LGPD)
+Banner fijo al bottom de la página. Persiste decisión en localStorage.
+Usar `useSyncExternalStore` para React 19 compatibility (no `useState` + `useEffect`).
+
+### User Profile auto-create
+Al primer Google login, crear documento en `users/{uid}` con datos del perfil de Google.
+Hacer fire-and-forget (no bloquear el login si falla).
+
+### 404 Page
+Crear `src/app/not-found.tsx` con branding. Usar `Link` de next/link (no `<a>`).
+
+### Admin CRUD
+Forms completos para crear/editar items principales.
+Conectar a Cloud Functions con App Check + Auth token.
+
+### Error Boundary
+`src/components/ErrorBoundary.tsx` wrapping el layout.
+Muestra mensaje branded + botón reload en caso de crash.
+
+---
+
+*Última actualización: Abril 2026 — basada en implementación de Lupyx Talent*

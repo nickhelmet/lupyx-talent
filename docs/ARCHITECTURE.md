@@ -234,3 +234,50 @@ Functions: manual `firebase deploy --only functions` (o agregar al CI)
 | Budget alerts | Google Cloud | $0 |
 
 **Costo fijo mensual sin tráfico: $0.** Costo máximo bajo ataque: ~$3/mes.
+
+---
+
+## Inventario completo
+
+### Páginas (11)
+| Ruta | Tipo | Auth |
+|------|------|------|
+| `/` | Landing pública | No |
+| `/auth/signin` | Login Google | No |
+| `/postular/[slug]` | Formulario postulación | Sí |
+| `/mi-cuenta` | Perfil + mis postulaciones | Sí |
+| `/admin` | Dashboard stats | Admin |
+| `/admin/jobs` | Lista búsquedas | Admin |
+| `/admin/jobs/new` | Crear búsqueda | Admin |
+| `/admin/applications` | Gestión postulaciones | Admin |
+| `/admin/users` | Gestión usuarios | Admin |
+| `/admin/allowlist` | Gestión accesos | Admin |
+| `/not-found` | 404 branded | No |
+
+### Cloud Functions (23)
+| Función | Auth | maxInstances |
+|---------|------|:----------:|
+| listJobs | App Check | 2 |
+| sitemap | No | 1 |
+| submitApplication | Auth + App Check | 1 |
+| listApplications | Auth + App Check | 1 |
+| userProfile | Auth + App Check | 1 |
+| getNotifications | Auth + App Check | 1 |
+| markNotificationRead | Auth + App Check | 1 |
+| createJob | Admin | 1 |
+| updateJob | Admin | 1 |
+| updateJobStatus | Admin | 1 |
+| adminListApplications | Admin | 1 |
+| updateApplicationStatus | Admin | 1 |
+| addInterviewNotes | Admin | 1 |
+| manageInterviewRounds | Admin | 1 |
+| listUsers | Admin | 1 |
+| updateUserRole | Admin | 1 |
+| toggleUserStatus | Admin | 1 |
+| adminDashboard | Admin | 1 |
+| fraudAnalysis | Admin | 1 |
+| getAllowlist | Admin | 1 |
+| addAllowlistEmail | Admin | 1 |
+| removeAllowlistEmail | Admin | 1 |
+
+### Tests: 81 (16 frontend + 65 functions)
