@@ -1,8 +1,7 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
-import { useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Briefcase,
@@ -24,20 +23,25 @@ const sidebarLinks = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, logout } = useAuth();
-  const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/auth/signin?returnUrl=/admin");
-    }
-  }, [user, loading, router]);
-
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#0B1F3B]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#2EC4B6] border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-gradient-to-br from-[#0B1F3B] via-[#1F4E79] to-[#0B1F3B] px-4">
+        <img src="/logo.webp" alt="Lupyx Talent" className="h-16 rounded-xl bg-white/10 p-1.5" />
+        <p className="text-lg text-white">Necesitás iniciar sesión para acceder al panel admin</p>
+        <a href="/auth/signin?returnUrl=/admin" className="rounded-full bg-[#2EC4B6] px-8 py-3 font-semibold text-white hover:bg-[#26a89c]">
+          Iniciar sesión
+        </a>
       </div>
     );
   }
