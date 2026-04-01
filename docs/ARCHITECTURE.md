@@ -113,6 +113,23 @@ PRs automáticos con label `devops`. Revisar y mergear patches de seguridad lo a
 
 ---
 
+## App Check (Bot Protection)
+
+Firebase App Check con reCAPTCHA v3 verifica que cada request viene de nuestra app legítima.
+
+- **Frontend:** `initializeAppCheck()` en `src/lib/firebase.ts` genera tokens automáticamente
+- **listJobs:** verifica App Check antes de ejecutar (bloquea curl/bots)
+- **authMiddleware:** verifica App Check antes de verificar auth token (protege TODOS los endpoints autenticados)
+- **Requests sin App Check token:** reciben 403 sin ejecutar lógica ni consumir Firestore
+
+### Setup
+1. Firebase Console → App Check → Registrar app con reCAPTCHA v3
+2. Google reCAPTCHA Admin → Crear site key v3 con dominios autorizados
+3. Frontend: inicializar con `ReCaptchaV3Provider(siteKey)`
+4. Functions: `verifyAppCheck(req)` antes de procesar
+
+---
+
 ## Cost Protection
 
 ### maxInstances
