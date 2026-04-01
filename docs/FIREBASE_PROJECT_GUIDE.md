@@ -577,26 +577,76 @@ Patrón para proteger el sitio durante desarrollo sin necesidad de backend:
 
 ---
 
-## Analytics
+## Analytics y SEO
 
-### Firebase Analytics setup
+### Firebase Analytics
 
+**Setup:**
+1. Firebase Console → Settings → Integrations → **Enable Google Analytics**
+2. Copiar `measurementId` (ej: `G-XXXXXXXXXX`)
+3. Agregar a `.env.local`: `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX`
+4. El SDK se inicializa automáticamente con `firebaseConfig.measurementId`
+
+**Tracking de eventos:**
 ```typescript
 // src/lib/analytics.ts
 import { getAnalytics, logEvent, isSupported } from "firebase/analytics";
 
-// Lazy init — only in browser, only if supported
+let analytics: Analytics | null = null;
+
+async function init() {
+  if (analytics) return analytics;
+  if (typeof window === "undefined" || !(await isSupported())) return null;
+  analytics = getAnalytics(getApps()[0]);
+  return analytics;
+}
+
 export async function trackEvent(name: string, params?: Record<string, string | number>) {
-  if (typeof window === "undefined") return;
-  if (!(await isSupported())) return;
-  const analytics = getAnalytics();
-  logEvent(analytics, name, params);
+  const a = await init();
+  if (a) logEvent(a, name, params);
 }
 ```
 
-**Eventos recomendados:** `page_view`, `login`, `sign_up`, item-specific views/actions, external link clicks.
+**Eventos recomendados por tipo de proyecto:**
+| Evento | Cuándo | Datos |
+|--------|--------|-------|
+| `page_view` | Carga de página | page_path |
+| `login` / `sign_up` | Auth exitoso | method |
+| `item_view` | Ver detalle de item | item_id, item_name |
+| `item_apply` | Acción principal del usuario | item_id |
+| `external_click` | Click en link externo | destination |
+| `contact_click` | Click en contacto | method |
 
-**Cookie consent:** Implementar banner opt-in antes de inicializar analytics (GDPR/LGPD).
+**Dashboard:** https://analytics.google.com → seleccionar propiedad.
+Datos tardan 24-48hs en aparecer.
+
+### Google Search Console
+
+**Setup:**
+1. https://search.google.com/search-console → Agregar propiedad
+2. Verificar ownership con DNS TXT record en Cloudflare
+3. Enviar sitemap: `https://tudominio.com/sitemap.xml`
+
+**Sitemap (`public/sitemap.xml`):**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://tudominio.com</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <!-- Agregar todas las páginas públicas -->
+</urlset>
+```
+
+Actualizar el sitemap cuando se agregan nuevas páginas o búsquedas.
+
+**Beneficios (gratis):**
+- Qué keywords traen tráfico
+- Errores de indexación
+- Rendimiento de búsqueda (impressions, clicks, CTR)
+- Cobertura (qué páginas indexó Google)
 
 ---
 
