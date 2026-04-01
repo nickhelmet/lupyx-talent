@@ -35,6 +35,7 @@
       }
     ],
     "rewrites": [
+      { "source": "/sitemap.xml", "function": "sitemap" },
       { "source": "/api/jobs", "function": "listJobs" },
       { "source": "/api/applications", "function": "submitApplication" },
       { "source": "/api/my-applications", "function": "listApplications" },
