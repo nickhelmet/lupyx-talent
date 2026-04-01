@@ -4,7 +4,7 @@ import { getCorsHeaders } from "./corsConfig";
 import { verifyAuth } from "./authMiddleware";
 import { rateLimit } from "./rateLimiter";
 
-export const fraudAnalysis = onRequest({ maxInstances: 3 }, async (req, res) => {
+export const fraudAnalysis = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }

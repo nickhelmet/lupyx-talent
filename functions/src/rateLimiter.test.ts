@@ -1,28 +1,67 @@
 import { describe, it, expect } from "vitest";
+import { rateLimit } from "./rateLimiter";
 
-// Test the rate limit configuration (without Firestore dependency)
-describe("Rate Limiter Configuration", () => {
-  it("has proper limits defined", async () => {
-    // Import the module to check it compiles
-    const mod = await import("./rateLimiter");
-    expect(mod.rateLimit).toBeDefined();
-    expect(typeof mod.rateLimit).toBe("function");
+function mockReq(ip = "1.2.3.4") {
+  return { headers: { "x-forwarded-for": ip }, ip };
+}
+
+function mockRes() {
+  const headers: Record<string, string> = {};
+  let statusCode = 0;
+  let body: unknown = null;
+  return {
+    set: (k: string, v: string) => { headers[k] = v; },
+    status: (code: number) => {
+      statusCode = code;
+      return { json: (b: unknown) => { body = b; } };
+    },
+    getHeaders: () => headers,
+    getStatus: () => statusCode,
+    getBody: () => body,
+  };
+}
+
+describe("In-memory Rate Limiter", () => {
+  it("allows requests within limit", async () => {
+    const res = mockRes();
+    const result = await rateLimit(mockReq("10.0.0.1"), res, "listJobs");
+    expect(result).toBe(true);
+    expect(res.getHeaders()["X-RateLimit-Remaining"]).toBe("59");
   });
-});
 
-describe("Rate Limit Logic", () => {
-  it("public endpoints allow more requests than auth endpoints", () => {
-    // These values come from the LIMITS config in rateLimiter.ts
-    const publicLimit = 60; // listJobs
-    const authLimit = 3; // submitApplication
-    expect(publicLimit).toBeGreaterThan(authLimit);
+  it("blocks after exceeding limit", async () => {
+    // Use unique IP to avoid collision with other tests
+    const ip = "10.0.0.2";
+    for (let i = 0; i < 3; i++) {
+      await rateLimit(mockReq(ip), mockRes(), "submitApplication", `user-${ip}`);
+    }
+    const res = mockRes();
+    const result = await rateLimit(mockReq(ip), res, "submitApplication", `user-${ip}`);
+    expect(result).toBe(false);
+    expect(res.getStatus()).toBe(429);
+    expect(res.getHeaders()["X-RateLimit-Remaining"]).toBe("0");
   });
 
-  it("admin endpoints have reasonable limits", () => {
-    const adminLimits = [10, 20, 30]; // createJob, updateApplicationStatus, adminListApplications
-    adminLimits.forEach((limit) => {
-      expect(limit).toBeGreaterThanOrEqual(10);
-      expect(limit).toBeLessThanOrEqual(30);
-    });
+  it("uses userId when provided instead of IP", async () => {
+    const res = mockRes();
+    await rateLimit(mockReq("10.0.0.3"), res, "userProfile", "uid-123");
+    expect(res.getHeaders()["X-RateLimit-Remaining"]).toBe("19");
+  });
+
+  it("sets correct headers", async () => {
+    const res = mockRes();
+    await rateLimit(mockReq("10.0.0.4"), res, "listJobs");
+    expect(res.getHeaders()["X-RateLimit-Remaining"]).toBeDefined();
+    expect(res.getHeaders()["X-RateLimit-Reset"]).toBeDefined();
+  });
+
+  it("different endpoints have separate counters", async () => {
+    const ip = "10.0.0.5";
+    const res1 = mockRes();
+    const res2 = mockRes();
+    await rateLimit(mockReq(ip), res1, "listJobs");
+    await rateLimit(mockReq(ip), res2, "adminDashboard", "admin-1");
+    expect(res1.getHeaders()["X-RateLimit-Remaining"]).toBe("59"); // 60 - 1
+    expect(res2.getHeaders()["X-RateLimit-Remaining"]).toBe("19"); // 20 - 1
   });
 });

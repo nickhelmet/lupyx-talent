@@ -1,8 +1,16 @@
-import { getFirestore } from "firebase-admin/firestore";
+/**
+ * In-memory rate limiter — zero Firestore cost.
+ * Resets on cold starts, which is acceptable with App Check + maxInstances.
+ */
 
 interface RateLimitConfig {
   maxRequests: number;
   windowSeconds: number;
+}
+
+interface RateLimitEntry {
+  count: number;
+  resetAt: number;
 }
 
 const LIMITS: Record<string, RateLimitConfig> = {
@@ -24,7 +32,21 @@ const LIMITS: Record<string, RateLimitConfig> = {
   adminDashboard: { maxRequests: 20, windowSeconds: 60 },
   fraudAnalysis: { maxRequests: 10, windowSeconds: 60 },
   listApplications: { maxRequests: 20, windowSeconds: 60 },
+  getAllowlist: { maxRequests: 20, windowSeconds: 60 },
+  addAllowlistEmail: { maxRequests: 10, windowSeconds: 60 },
+  removeAllowlistEmail: { maxRequests: 10, windowSeconds: 60 },
 };
+
+// In-memory store — resets on cold start
+const store = new Map<string, RateLimitEntry>();
+
+// Cleanup expired entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of store) {
+    if (now > entry.resetAt) store.delete(key);
+  }
+}, 5 * 60 * 1000);
 
 function getClientIP(req: { headers: Record<string, string | string[] | undefined>; ip?: string }): string {
   const forwarded = req.headers["x-forwarded-for"];
@@ -33,9 +55,7 @@ function getClientIP(req: { headers: Record<string, string | string[] | undefine
 }
 
 /**
- * Check rate limit. Returns true if allowed, false if blocked.
- * Sets rate limit headers on the response.
- * If blocked, sends 429 response automatically.
+ * Check rate limit. Returns true if allowed, false if blocked (sends 429).
  */
 export async function rateLimit(
   req: { headers: Record<string, string | string[] | undefined>; ip?: string },
@@ -45,48 +65,32 @@ export async function rateLimit(
 ): Promise<boolean> {
   const config = LIMITS[endpoint] || { maxRequests: 30, windowSeconds: 60 };
   const identifier = userId || getClientIP(req);
-  const db = getFirestore();
-  const key = `rate_limits/${endpoint}_${identifier.replace(/[^a-zA-Z0-9]/g, "_")}`;
+  const key = `${endpoint}:${identifier}`;
   const now = Date.now();
   const windowMs = config.windowSeconds * 1000;
 
-  try {
-    const doc = await db.doc(key).get();
-    const data = doc.data();
+  const entry = store.get(key);
 
-    if (!data || now > data.resetAt) {
-      // New window
-      await db.doc(key).set({
-        count: 1,
-        resetAt: now + windowMs,
-      });
-      setHeaders(res, config.maxRequests - 1, now + windowMs);
-      return true;
-    }
-
-    if (data.count >= config.maxRequests) {
-      // Blocked
-      setHeaders(res, 0, data.resetAt);
-      res.status(429).json({
-        error: "Too many requests",
-        retryAfter: Math.ceil((data.resetAt - now) / 1000),
-      });
-      console.warn(`Rate limited: ${endpoint} by ${identifier} (${data.count}/${config.maxRequests})`);
-      return false;
-    }
-
-    // Increment
-    await db.doc(key).update({ count: data.count + 1 });
-    setHeaders(res, config.maxRequests - data.count - 1, data.resetAt);
-    return true;
-  } catch (error) {
-    // On error, allow request (fail open) but log
-    console.error(`Rate limiter error for ${endpoint}:`, error);
+  if (!entry || now > entry.resetAt) {
+    store.set(key, { count: 1, resetAt: now + windowMs });
+    res.set("X-RateLimit-Remaining", String(config.maxRequests - 1));
+    res.set("X-RateLimit-Reset", String(Math.ceil((now + windowMs) / 1000)));
     return true;
   }
-}
 
-function setHeaders(res: { set: (key: string, value: string) => void }, remaining: number, resetAt: number) {
-  res.set("X-RateLimit-Remaining", String(remaining));
-  res.set("X-RateLimit-Reset", String(Math.ceil(resetAt / 1000)));
+  if (entry.count >= config.maxRequests) {
+    res.set("X-RateLimit-Remaining", "0");
+    res.set("X-RateLimit-Reset", String(Math.ceil(entry.resetAt / 1000)));
+    res.status(429).json({
+      error: "Too many requests",
+      retryAfter: Math.ceil((entry.resetAt - now) / 1000),
+    });
+    console.warn(`Rate limited: ${endpoint} by ${identifier} (${entry.count}/${config.maxRequests})`);
+    return false;
+  }
+
+  entry.count++;
+  res.set("X-RateLimit-Remaining", String(config.maxRequests - entry.count));
+  res.set("X-RateLimit-Reset", String(Math.ceil(entry.resetAt / 1000)));
+  return true;
 }

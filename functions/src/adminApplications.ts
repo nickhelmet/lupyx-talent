@@ -5,7 +5,7 @@ import { verifyAuth } from "./authMiddleware";
 import { rateLimit } from "./rateLimiter";
 import { validateApplicationStatus, sanitizeString } from "./validation";
 
-export const adminListApplications = onRequest({ maxInstances: 5 }, async (req, res) => {
+export const adminListApplications = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
@@ -21,7 +21,7 @@ export const adminListApplications = onRequest({ maxInstances: 5 }, async (req, 
   res.status(200).json(apps);
 });
 
-export const updateApplicationStatus = onRequest({ maxInstances: 3 }, async (req, res) => {
+export const updateApplicationStatus = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
@@ -45,7 +45,7 @@ export const updateApplicationStatus = onRequest({ maxInstances: 3 }, async (req
   res.status(200).json({ message: `Status updated to ${status}` });
 });
 
-export const addInterviewNotes = onRequest({ maxInstances: 3 }, async (req, res) => {
+export const addInterviewNotes = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
@@ -88,7 +88,7 @@ export const addInterviewNotes = onRequest({ maxInstances: 3 }, async (req, res)
   res.status(200).json({ message: "Notes updated" });
 });
 
-export const manageInterviewRounds = onRequest({ maxInstances: 3 }, async (req, res) => {
+export const manageInterviewRounds = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
