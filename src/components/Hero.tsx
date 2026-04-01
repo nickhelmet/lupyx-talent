@@ -53,11 +53,14 @@ export default function Hero() {
             transition={{ delay: 0.1, duration: 0.6 }}
             className="mb-8"
           >
-            <img
-              src="/logo.jpg"
-              alt="Lupyx Talent"
-              className="mx-auto h-20 w-auto rounded-xl bg-white/10 p-2 backdrop-blur-sm sm:h-28"
-            />
+            <picture>
+              <source srcSet="/logo.webp" type="image/webp" />
+              <img
+                src="/logo.jpg"
+                alt="Lupyx Talent"
+                className="mx-auto h-20 w-auto rounded-xl bg-white/10 p-2 backdrop-blur-sm sm:h-28"
+              />
+            </picture>
           </motion.div>
 
           <motion.div
