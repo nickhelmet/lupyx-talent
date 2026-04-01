@@ -113,6 +113,24 @@ PRs automáticos con label `devops`. Revisar y mergear patches de seguridad lo a
 
 ---
 
+## Analytics
+
+Firebase Analytics integrado con eventos custom:
+
+| Evento | Trigger | Datos |
+|--------|---------|-------|
+| `job_apply_start` | Click en Postularme | jobId |
+| `job_apply_complete` | Postulación enviada | jobId |
+| `linkedin_click` | Click en Ver en LinkedIn | — |
+| `contact_click` | Click en contacto | method (LinkedIn/Instagram/Email) |
+| `login` | Google Sign-In exitoso | method: google |
+| `dark_mode_toggle` | Toggle dark mode | mode |
+
+**Measurement ID:** `G-JWQWYY5WTQ`
+**Dashboard:** https://analytics.google.com → Lupyx Talent
+
+---
+
 ## App Check (Bot Protection)
 
 Firebase App Check con reCAPTCHA v3 verifica que cada request viene de nuestra app legítima.

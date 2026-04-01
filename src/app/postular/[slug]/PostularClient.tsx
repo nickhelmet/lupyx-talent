@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { submitApplication } from "@/services/api";
 import { ArrowLeft, Send, Loader2, Upload, FileText, X } from "lucide-react";
+import { track } from "@/lib/analytics";
 
 const educationOptions = [
   { value: "PRIMARY", label: "Primario" },
@@ -106,6 +107,7 @@ export default function PostularClient() {
         cvBase64,
       });
       setSuccess(true);
+      track.jobApplyComplete(slug);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al enviar postulación");
     } finally {

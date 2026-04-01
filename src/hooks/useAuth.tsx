@@ -15,6 +15,7 @@ import {
   type User,
 } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase";
+import { track } from "@/lib/analytics";
 
 interface AuthCtx {
   user: User | null;
@@ -44,7 +45,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function loginWithGoogle() {
     const auth = getFirebaseAuth();
-    await signInWithPopup(auth, new GoogleAuthProvider());
+    const result = await signInWithPopup(auth, new GoogleAuthProvider());
+    if (result.user) {
+      track.login();
+    }
   }
 
   async function logout() {

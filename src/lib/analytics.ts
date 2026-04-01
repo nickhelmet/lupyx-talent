@@ -1,27 +1,34 @@
-import { getAnalytics, logEvent, isSupported } from "firebase/analytics";
+import { getAnalytics, logEvent, isSupported, type Analytics } from "firebase/analytics";
 import { getApps } from "firebase/app";
 
-let analyticsInstance: ReturnType<typeof getAnalytics> | null = null;
+let analytics: Analytics | null = null;
+let initPromise: Promise<Analytics | null> | null = null;
 
-async function getAnalyticsInstance() {
-  if (analyticsInstance) return analyticsInstance;
-  if (typeof window === "undefined") return null;
-  if (!(await isSupported())) return null;
-  const apps = getApps();
-  if (apps.length === 0) return null;
-  analyticsInstance = getAnalytics(apps[0]);
-  return analyticsInstance;
+function init(): Promise<Analytics | null> {
+  if (analytics) return Promise.resolve(analytics);
+  if (initPromise) return initPromise;
+
+  initPromise = (async () => {
+    if (typeof window === "undefined") return null;
+    if (!(await isSupported())) return null;
+    const apps = getApps();
+    if (apps.length === 0) return null;
+    analytics = getAnalytics(apps[0]);
+    return analytics;
+  })();
+
+  return initPromise;
 }
 
 export async function trackEvent(name: string, params?: Record<string, string | number>) {
-  const analytics = await getAnalyticsInstance();
-  if (!analytics) return;
-  logEvent(analytics, name, params);
+  const a = await init();
+  if (!a) return;
+  logEvent(a, name, params);
 }
 
-// Pre-defined events
 export const track = {
-  jobView: (jobId: string) => trackEvent("job_view", { job_id: jobId }),
+  pageView: (page: string) => trackEvent("page_view", { page_path: page }),
+  jobView: (jobId: string, jobTitle: string) => trackEvent("job_view", { job_id: jobId, job_title: jobTitle }),
   jobApplyStart: (jobId: string) => trackEvent("job_apply_start", { job_id: jobId }),
   jobApplyComplete: (jobId: string) => trackEvent("job_apply_complete", { job_id: jobId }),
   linkedinClick: () => trackEvent("linkedin_click"),
@@ -29,4 +36,5 @@ export const track = {
   contactClick: (method: string) => trackEvent("contact_click", { method }),
   login: () => trackEvent("login", { method: "google" }),
   signup: () => trackEvent("sign_up", { method: "google" }),
+  darkModeToggle: (mode: string) => trackEvent("dark_mode_toggle", { mode }),
 };

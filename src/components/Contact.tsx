@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Mail } from "lucide-react";
+import { track } from "@/lib/analytics";
 
 function LinkedInIcon({ className }: { className?: string }) {
   return (
@@ -83,6 +84,7 @@ export default function Contact() {
                   ? undefined
                   : "noopener noreferrer"
               }
+              onClick={() => track.contactClick(link.label)}
               className={`group flex flex-col items-center gap-3 rounded-2xl border border-gray-100 bg-white p-8 shadow-sm transition-all hover:shadow-lg dark:border-white/10 dark:bg-white/5 ${link.bgHover}`}
             >
               <div
