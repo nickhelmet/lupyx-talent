@@ -4,6 +4,7 @@ import { getCorsHeaders } from "./corsConfig";
 import { verifyAuth } from "./authMiddleware";
 import { rateLimit } from "./rateLimiter";
 import { validateApplicationStatus, sanitizeString } from "./validation";
+import { sendStatusChangeNotification } from "./email";
 
 export const adminListApplications = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
@@ -38,10 +39,22 @@ export const updateApplicationStatus = onRequest({ maxInstances: 1 }, async (req
   }
 
   const db = getFirestore();
+  const appDoc = await db.doc(`applications/${applicationId}`).get();
   await db.doc(`applications/${applicationId}`).update({
     status,
     updatedAt: FieldValue.serverTimestamp(),
   });
+
+  // Email candidate about status change
+  try {
+    const appData = appDoc.data();
+    if (appData?.email && appData?.firstName) {
+      await sendStatusChangeNotification(appData.email, appData.firstName, appData.jobTitle || "", status);
+    }
+  } catch (e) {
+    console.error("Failed to send status change email:", e);
+  }
+
   res.status(200).json({ message: `Status updated to ${status}` });
 });
 
