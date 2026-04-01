@@ -20,8 +20,8 @@ jobs:
       - run: npm run lint
       - run: npx tsc --noEmit
       - run: npm test
-      - name: Type check Cloud Functions
-        run: cd functions && npm ci && npx tsc --noEmit
+      - name: Type check and test Cloud Functions
+        run: cd functions && npm ci && npx tsc --noEmit && npx vitest run
 
   build:
     name: Build
