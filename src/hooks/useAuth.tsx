@@ -48,6 +48,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const result = await signInWithPopup(auth, new GoogleAuthProvider());
     if (result.user) {
       track.login();
+      // Create user profile on first login (fire and forget)
+      try {
+        const token = await result.user.getIdToken();
+        const { getAppCheck } = await import("@/lib/firebase");
+        const appCheck = getAppCheck();
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+        if (appCheck) {
+          const { getToken } = await import("firebase/app-check");
+          const acToken = await getToken(appCheck, false);
+          headers["X-Firebase-AppCheck"] = acToken.token;
+        }
+        const apiBase = process.env.NEXT_PUBLIC_USE_EMULATORS === "true"
+          ? "http://localhost:5001/lupyx-talent/us-central1"
+          : "https://us-central1-lupyx-talent.cloudfunctions.net";
+        await fetch(`${apiBase}/userProfile`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            firstName: result.user.displayName?.split(" ")[0] || "",
+            lastName: result.user.displayName?.split(" ").slice(1).join(" ") || "",
+          }),
+        });
+      } catch {
+        // Non-blocking — profile will be created later
+      }
     }
   }
 

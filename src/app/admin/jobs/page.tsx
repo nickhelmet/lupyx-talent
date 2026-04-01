@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Pause, Play, Loader2 } from "lucide-react";
+import { Pause, Play, Plus, Loader2 } from "lucide-react";
 import { getFirebaseAuth } from "@/lib/firebase";
 import { getApiBase } from "@/lib/environment";
 import type { Job } from "@/types";
@@ -79,6 +79,12 @@ export default function AdminJobs() {
     <div>
       <div className="flex items-center justify-between">
         <p className="text-sm text-[#1F4E79]/60 dark:text-gray-400">{jobs.length} búsquedas</p>
+        <a
+          href="/admin/jobs/new"
+          className="flex items-center gap-2 rounded-full bg-[#2EC4B6] px-5 py-2 text-sm font-semibold text-white hover:bg-[#26a89c]"
+        >
+          <Plus className="h-4 w-4" /> Nueva búsqueda
+        </a>
       </div>
 
       {error && (
