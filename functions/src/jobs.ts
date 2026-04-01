@@ -3,7 +3,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { getCorsHeaders } from "./corsConfig";
 import { rateLimit } from "./rateLimiter";
 
-export const listJobs = onRequest({ maxInstances: 10 }, async (req, res) => {
+export const listJobs = onRequest({ maxInstances: 2 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
 

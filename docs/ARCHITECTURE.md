@@ -88,7 +88,7 @@ npm test   # desde raíz
 - Environment: 3 tests (emulator detection, API base URL)
 - Analytics: 2 tests (track functions exist, callable sin Firebase)
 
-### Cloud Functions (44 tests)
+### Cloud Functions (46 tests)
 ```bash
 cd functions && npx vitest run
 ```
@@ -113,9 +113,19 @@ PRs automáticos con label `devops`. Revisar y mergear patches de seguridad lo a
 
 ---
 
+## Cost Protection
+
+### maxInstances
+Todas las Cloud Functions tienen `maxInstances: 1` (excepto `listJobs: 2`).
+Esto limita el costo máximo a ~$3/mes incluso bajo ataque sostenido 24/7.
+
+Requests que exceden la capacidad reciben 429 automáticamente de Cloud Run (sin ejecutar código).
+
+---
+
 ## Rate Limiting
 
-Todas las Cloud Functions están protegidas con rate limiting basado en Firestore.
+Todas las Cloud Functions están protegidas con rate limiting **in-memory** (costo $0).
 
 ### Límites por endpoint
 
@@ -131,7 +141,8 @@ Todas las Cloud Functions están protegidas con rate limiting basado en Firestor
 - Request permitido → headers `X-RateLimit-Remaining`, `X-RateLimit-Reset`
 - Request bloqueado → HTTP 429 con `retryAfter` en body
 - Error en rate limiter → fail open (permite request, loguea error)
-- Contadores almacenados en `rate_limits/` collection en Firestore
+- Contadores in-memory (Map<>), se resetean en cold starts
+- Costo del rate limiting: $0 (no usa Firestore)
 
 ---
 

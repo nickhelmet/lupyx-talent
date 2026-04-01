@@ -846,9 +846,35 @@ Inmediatamente después del upgrade:
 ### Estrategia de costos
 1. Empezar en Spark plan para desarrollo (Hosting + Firestore rules)
 2. Upgrade a Blaze cuando estés listo para deployar Cloud Functions
-3. Configurar budget alerts inmediatamente
-4. Poner `maxInstances` en cada Cloud Function (previene cost runaway)
-5. Monitorear quotas en Firebase Console mensualmente
+3. Configurar budget alerts inmediatamente ($5, $10)
+4. `maxInstances: 1` en cada Cloud Function (previene cost runaway)
+5. Rate limiting in-memory (no Firestore, costo $0)
+6. App Check para bloquear bots
+7. Monitorear quotas en Firebase Console mensualmente
+
+### Capas de protección contra abuso (defensa en profundidad)
+
+```
+Capa 1: maxInstances=1     → Limita costo máximo (~$3/mes bajo ataque 24/7)
+Capa 2: Rate limiting       → Bloquea IPs/usuarios abusivos (in-memory, $0)
+Capa 3: App Check           → Bloquea bots/scripts antes de ejecutar función
+Capa 4: Auth middleware      → Solo usuarios autenticados
+Capa 5: Allowlist            → Solo emails autorizados
+Capa 6: Budget alerts        → Notificación si se acerca al límite
+Capa 7: Input validation     → Previene payloads maliciosos
+```
+
+**maxInstances es la protección más importante.** Incluso si todo lo demás falla, `maxInstances: 1` pone un techo predecible al costo.
+
+### Rate limiting: in-memory vs Firestore
+
+| Approach | Costo por request | Persistencia |
+|----------|------------------|-------------|
+| **Firestore** | 2 ops (~$0.12/10k) | Sí |
+| **In-memory** | $0 | No (reset en cold start) |
+| **Upstash Redis** | Free tier 10k/day | Sí |
+
+Con `maxInstances: 1` + App Check, in-memory es suficiente.
 
 ---
 

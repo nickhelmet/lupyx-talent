@@ -8,7 +8,7 @@ import { rateLimit } from "./rateLimiter";
 import { createNotification } from "./notifications";
 import { sanitizeString, validatePhone, validateDNI, validateEducationLevel } from "./validation";
 
-export const submitApplication = onRequest({ maxInstances: 5 }, async (req, res) => {
+export const submitApplication = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
 
@@ -155,7 +155,7 @@ export const submitApplication = onRequest({ maxInstances: 5 }, async (req, res)
   }
 });
 
-export const listApplications = onRequest({ maxInstances: 5 }, async (req, res) => {
+export const listApplications = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
 

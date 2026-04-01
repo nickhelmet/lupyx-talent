@@ -4,7 +4,7 @@ import { getCorsHeaders } from "./corsConfig";
 import { verifyAuth } from "./authMiddleware";
 import { rateLimit } from "./rateLimiter";
 
-export const listUsers = onRequest({ maxInstances: 5 }, async (req, res) => {
+export const listUsers = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
@@ -20,7 +20,7 @@ export const listUsers = onRequest({ maxInstances: 5 }, async (req, res) => {
   res.status(200).json(users);
 });
 
-export const updateUserRole = onRequest({ maxInstances: 3 }, async (req, res) => {
+export const updateUserRole = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
@@ -52,7 +52,7 @@ export const updateUserRole = onRequest({ maxInstances: 3 }, async (req, res) =>
   res.status(200).json({ message: `Role updated to ${role}` });
 });
 
-export const toggleUserStatus = onRequest({ maxInstances: 3 }, async (req, res) => {
+export const toggleUserStatus = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
@@ -84,7 +84,7 @@ export const toggleUserStatus = onRequest({ maxInstances: 3 }, async (req, res) 
   res.status(200).json({ message: `User ${isActive ? "activated" : "deactivated"}` });
 });
 
-export const adminDashboard = onRequest({ maxInstances: 3 }, async (req, res) => {
+export const adminDashboard = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }

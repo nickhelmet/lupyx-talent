@@ -21,7 +21,7 @@ export async function createNotification(
   });
 }
 
-export const getNotifications = onRequest({ maxInstances: 5 }, async (req, res) => {
+export const getNotifications = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
@@ -42,7 +42,7 @@ export const getNotifications = onRequest({ maxInstances: 5 }, async (req, res) 
   res.status(200).json(notifications);
 });
 
-export const markNotificationRead = onRequest({ maxInstances: 5 }, async (req, res) => {
+export const markNotificationRead = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }

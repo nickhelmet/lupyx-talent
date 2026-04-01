@@ -5,7 +5,7 @@ import { verifyAuth } from "./authMiddleware";
 import { rateLimit } from "./rateLimiter";
 import { sanitizeString, validateJobStatus } from "./validation";
 
-export const createJob = onRequest({ maxInstances: 3 }, async (req, res) => {
+export const createJob = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
@@ -48,7 +48,7 @@ export const createJob = onRequest({ maxInstances: 3 }, async (req, res) => {
   res.status(201).json({ id: slug, message: "Job created" });
 });
 
-export const updateJob = onRequest({ maxInstances: 3 }, async (req, res) => {
+export const updateJob = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
@@ -66,7 +66,7 @@ export const updateJob = onRequest({ maxInstances: 3 }, async (req, res) => {
   res.status(200).json({ message: "Job updated" });
 });
 
-export const updateJobStatus = onRequest({ maxInstances: 3 }, async (req, res) => {
+export const updateJobStatus = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
