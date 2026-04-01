@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { fetchJobs } from "@/services/api";
+import { track } from "@/lib/analytics";
 import type { Job } from "@/types";
 
 interface JobListing {
@@ -87,6 +88,7 @@ export default function ActiveSearches() {
   }, []);
 
   function handleApply(jobId: string) {
+    track.jobApplyStart(jobId);
     if (!user) {
       loginWithGoogle();
       return;
@@ -178,6 +180,7 @@ export default function ActiveSearches() {
                   href={job.linkedinUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => track.linkedinClick()}
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2EC4B6] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#26a89c] hover:shadow-md"
                 >
                   Ver en LinkedIn
