@@ -878,6 +878,24 @@ Con `maxInstances: 1` + App Check, in-memory es suficiente.
 
 ---
 
+## App Check (reCAPTCHA v3)
+
+Bloquea bots, scripts y requests directas (curl) antes de ejecutar Cloud Functions.
+
+### Setup
+1. **reCAPTCHA Admin** → crear site key v3 con dominios autorizados
+2. **Firebase Console** → App Check → registrar app con reCAPTCHA + secret key
+3. **Frontend**: `initializeAppCheck(app, { provider: new ReCaptchaV3Provider(siteKey) })`
+4. **Functions**: `verifyAppCheck(req)` verifica header `x-firebase-appcheck`
+5. Integrar en funciones públicas (directo) y autenticadas (dentro de `verifyAuth`)
+
+### Resultado
+- `curl` directo → 403 (sin token App Check)
+- Browser legítimo → token auto-generado → funciona normal
+- Bots sin JavaScript → no pueden generar token → bloqueados
+
+---
+
 ## Deploy de Cloud Functions
 
 ### Primer deploy

@@ -1,6 +1,7 @@
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { Request } from "firebase-functions/v2/https";
+import { verifyAppCheck } from "./appCheck";
 
 export interface AuthenticatedUser {
   uid: string;
@@ -28,6 +29,9 @@ async function getAllowlist() {
 }
 
 export async function verifyAuth(req: Request): Promise<AuthenticatedUser | null> {
+  // Verify App Check first
+  if (!(await verifyAppCheck(req))) return null;
+
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith("Bearer ")) return null;
 

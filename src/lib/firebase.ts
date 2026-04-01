@@ -5,6 +5,7 @@ import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
+import { initializeAppCheck, ReCaptchaV3Provider, type AppCheck } from "firebase/app-check";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -20,10 +21,22 @@ let app: FirebaseApp | undefined;
 let auth: Auth | undefined;
 let db: Firestore | undefined;
 let storage: FirebaseStorage | undefined;
+let appCheck: AppCheck | undefined;
 
 function getFirebaseApp(): FirebaseApp {
   if (!app) {
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+    // Initialize App Check (browser only)
+    if (typeof window !== "undefined" && !appCheck) {
+      try {
+        appCheck = initializeAppCheck(app, {
+          provider: new ReCaptchaV3Provider("6LesraAsAAAAAAOw2b9MtRlKfNelemFog8aoDnrZ"),
+          isTokenAutoRefreshEnabled: true,
+        });
+      } catch {
+        // App Check init may fail in dev/test environments
+      }
+    }
   }
   return app;
 }
