@@ -1049,6 +1049,35 @@ export const scheduledBackup = onSchedule(
 
 ---
 
+## IAM y Mínimo Privilegio
+
+### Principio
+Solo habilitar lo que se necesita. Cada API, rol y service account es superficie de ataque.
+
+### Auditoría periódica
+```bash
+gcloud iam service-accounts list --project=tu-proyecto           # SAs
+gcloud projects get-iam-policy tu-proyecto                       # Roles
+gcloud iam service-accounts keys list --iam-account=SA_EMAIL     # Keys
+gcloud services list --project=tu-proyecto --enabled             # APIs
+```
+
+### Checklist de mínimo privilegio
+- [ ] Solo 1 key activa por service account
+- [ ] Deshabilitar APIs no usadas (`gcloud services disable API`)
+- [ ] API key del browser restringida por HTTP referrer
+- [ ] reCAPTCHA keys en env vars, no hardcoded
+- [ ] Todos los secrets en GitHub Secrets, nunca en código
+
+### APIs mínimas para Firebase (~20 de ~50+ disponibles)
+Cloud Functions, Cloud Build, Cloud Run, Firestore, Storage, Firebase Hosting,
+Firebase App Check, IAM, Identity Toolkit, Logging, Monitoring, Artifact Registry,
+Cloud Scheduler, Eventarc, Pub/Sub.
+
+Deshabilitar: BigQuery, DataPlex, FCM, App Distribution, Remote Config, etc.
+
+---
+
 ## Checklist de lanzamiento
 
 ### Pre-launch (obligatorio)

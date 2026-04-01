@@ -13,7 +13,7 @@ export const getAllowlist = onRequest({ maxInstances: 1 }, async (req, res) => {
 
   const user = await verifyAuth(req);
   if (!user?.isAdmin) { res.status(403).json({ error: "Forbidden" }); return; }
-  if (!(await rateLimit(req, res, "adminDashboard", user.uid))) return;
+  if (!(await rateLimit(req, res, "getAllowlist", user.uid))) return;
 
   const db = getFirestore();
   const doc = await db.doc("config/allowlist").get();
@@ -28,6 +28,7 @@ export const addAllowlistEmail = onRequest({ maxInstances: 1 }, async (req, res)
 
   const user = await verifyAuth(req);
   if (!user?.isAdmin) { res.status(403).json({ error: "Forbidden" }); return; }
+  if (!(await rateLimit(req, res, "addAllowlistEmail", user.uid))) return;
 
   const email = validateEmail(req.body.email);
   const list = req.body.list; // "allowed_emails" | "admin_emails"
@@ -52,6 +53,7 @@ export const removeAllowlistEmail = onRequest({ maxInstances: 1 }, async (req, r
 
   const user = await verifyAuth(req);
   if (!user?.isAdmin) { res.status(403).json({ error: "Forbidden" }); return; }
+  if (!(await rateLimit(req, res, "removeAllowlistEmail", user.uid))) return;
 
   const email = validateEmail(req.body.email);
   const list = req.body.list;

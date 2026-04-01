@@ -19,7 +19,8 @@ export async function verifyAppCheck(
   try {
     await getAppCheck().verifyToken(appCheckToken);
     return true;
-  } catch {
+  } catch (error) {
+    console.warn("App Check verification failed:", error instanceof Error ? error.message : "unknown");
     return false;
   }
 }
