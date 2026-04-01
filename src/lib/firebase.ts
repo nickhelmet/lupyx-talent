@@ -64,3 +64,8 @@ export function getFirebaseStorage(): FirebaseStorage {
   }
   return storage;
 }
+
+export function getAppCheck(): AppCheck | null {
+  getFirebaseApp(); // Ensure initialized
+  return appCheck || null;
+}
