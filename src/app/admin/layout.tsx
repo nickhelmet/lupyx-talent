@@ -8,6 +8,7 @@ import {
   Briefcase,
   FileText,
   Users,
+  Shield,
   LogOut,
   Menu,
 } from "lucide-react";
@@ -18,6 +19,7 @@ const sidebarLinks = [
   { href: "/admin/jobs", icon: Briefcase, label: "Búsquedas" },
   { href: "/admin/applications", icon: FileText, label: "Postulaciones" },
   { href: "/admin/users", icon: Users, label: "Usuarios" },
+  { href: "/admin/allowlist", icon: Shield, label: "Accesos" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

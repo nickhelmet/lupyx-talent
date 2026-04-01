@@ -4,59 +4,59 @@ import { motion } from "framer-motion";
 import {
   MapPin,
   Briefcase,
-  DollarSign,
   ExternalLink,
   Clock,
-  Monitor,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { fetchJobs } from "@/services/api";
+import type { Job } from "@/types";
 
 interface JobListing {
   id: string;
   title: string;
   company: string;
   location: string;
-  modality: string;
   type: string;
-  compensation: string;
   tags: string[];
   linkedinUrl: string;
   description: string;
 }
 
-const activeJobs: JobListing[] = [
+function mapJob(job: Job): JobListing {
+  return {
+    id: job.slug || job.id,
+    title: job.title,
+    company: job.company,
+    location: job.location,
+    type: job.type === "CONTRACT" ? "Contractor" : job.type,
+    tags: job.tags || [],
+    linkedinUrl: job.linkedinUrl || "https://www.linkedin.com/company/lupyx-talent/jobs/",
+    description: job.description,
+  };
+}
+
+const fallbackJobs: JobListing[] = [
   {
     id: "senior-backend-java",
     title: "Senior Backend Engineer",
     company: "Empresa confidencial",
     location: "Buenos Aires / Santa Fe, Argentina",
-    modality: "Híbrido (3 oficina / 2 remoto)",
     type: "Contractor",
-    compensation: "Pago en USD",
-    tags: ["Java 21", "Backend", "+4.5 años exp.", "Título universitario"],
+    tags: ["Java 21", "Backend", "+4.5 años exp."],
     linkedinUrl: "https://www.linkedin.com/company/lupyx-talent/jobs/",
-    description:
-      "Buscamos un Senior Backend Engineer con experiencia sólida en Java 21 para sumarse a un equipo de alto rendimiento.",
+    description: "Buscamos un Senior Backend Engineer con experiencia sólida en Java 21.",
   },
   {
     id: "senior-marketing-designer",
     title: "Senior Marketing Designer",
     company: "Startup AI en crecimiento",
     location: "100% Remoto — LATAM",
-    modality: "Remoto",
     type: "Contractor",
-    compensation: "Pago en USD",
-    tags: [
-      "Figma",
-      "Webflow",
-      "After Effects",
-      "Inglés avanzado",
-      "3-5 años exp.",
-    ],
+    tags: ["Figma", "Webflow", "After Effects", "Inglés avanzado"],
     linkedinUrl: "https://www.linkedin.com/company/lupyx-talent/jobs/",
-    description:
-      "Sumate a una startup de IA en pleno crecimiento como Senior Marketing Designer. Diseñá piezas que impacten.",
+    description: "Sumate a una startup de IA en pleno crecimiento como Senior Marketing Designer.",
   },
 ];
 
@@ -76,6 +76,15 @@ const item = {
 export default function ActiveSearches() {
   const { user, loginWithGoogle } = useAuth();
   const router = useRouter();
+  const [jobs, setJobs] = useState<JobListing[]>(fallbackJobs);
+
+  useEffect(() => {
+    fetchJobs()
+      .then((data: Job[]) => {
+        if (data.length > 0) setJobs(data.map(mapJob));
+      })
+      .catch(() => {}); // Keep fallback on error
+  }, []);
 
   function handleApply(jobId: string) {
     if (!user) {
@@ -116,7 +125,7 @@ export default function ActiveSearches() {
           viewport={{ once: true, margin: "-100px" }}
           className="mt-12 grid gap-6 md:grid-cols-2"
         >
-          {activeJobs.map((job) => (
+          {jobs.map((job) => (
             <motion.div
               key={job.id}
               variants={item}
@@ -146,16 +155,8 @@ export default function ActiveSearches() {
                   {job.location}
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Monitor className="h-4 w-4 text-[#4FA3D1]" />
-                  {job.modality}
-                </span>
-                <span className="flex items-center gap-1.5">
                   <Briefcase className="h-4 w-4 text-[#4FA3D1]" />
                   {job.type}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <DollarSign className="h-4 w-4 text-[#2EC4B6]" />
-                  {job.compensation}
                 </span>
               </div>
 
