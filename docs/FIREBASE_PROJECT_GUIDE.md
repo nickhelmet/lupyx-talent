@@ -728,11 +728,53 @@ volumes:
 
 ## Input Validation
 
-- Sanitizar strings: strip HTML tags, entities, limit length
-- Validar email, phone, DNI con regex
-- Validar enums contra listas whitelist
-- PDF: verificar magic bytes (`%PDF`)
-- Nunca confiar en input del cliente — validar en Cloud Functions
+**Regla de oro:** Nunca confiar en input del cliente. Validar TODO en Cloud Functions.
+
+### Patrón por tipo de campo
+
+| Tipo | Validación | Ejemplo |
+|------|-----------|---------|
+| **Texto libre** | `sanitizeString()` — strip HTML, entities, trim, max length | nombre, apellido, dirección, notas |
+| **Email** | Regex + lowercase + trim | `validateEmail()` |
+| **Teléfono** | Solo chars válidos (+, -, (), espacios, dígitos), min 8 | `validatePhone()` |
+| **DNI/ID** | Solo dígitos, longitud fija | `validateDNI()` |
+| **Enum** | Whitelist explícita | `validateApplicationStatus()`, `validateJobStatus()` |
+| **Fecha** | Regex ISO `YYYY-MM-DD` | `birthDate`, `scheduledDate` |
+| **Scores** | Numérico, clamped 0-10 | `Math.max(0, Math.min(10, v))` |
+| **URL** | Debe empezar con `https://`, max length | `linkedinUrl` |
+| **Document ID** | Solo `[a-zA-Z0-9_-]` | `jobId`, `applicationId` |
+| **Archivo** | Magic bytes, max size, no JS/macros | PDF upload |
+| **Array** | Filtrar por tipo, max items, sanitize cada item | `tags` |
+
+### Implementación en Cloud Functions
+
+```typescript
+// En cada Cloud Function, sanitizar ANTES de usar los datos
+const raw = req.body;
+const firstName = sanitizeString(raw.firstName).slice(0, 100);
+const phone = validatePhone(raw.phone);
+const status = validateApplicationStatus(raw.status);
+const jobId = typeof raw.jobId === "string" ? raw.jobId.replace(/[^a-zA-Z0-9_-]/g, "") : "";
+
+if (!firstName || !phone) {
+  res.status(400).json({ error: "Invalid input" }); return;
+}
+```
+
+### Vectores de ataque prevenidos
+
+| Ataque | Prevención |
+|--------|-----------|
+| **XSS** | `sanitizeString()` strip tags |
+| **NoSQL injection** | Document IDs filtrados a `[a-zA-Z0-9_-]` |
+| **Overflow** | `.slice(0, maxLength)` en todos los campos |
+| **Type confusion** | `typeof` check antes de usar |
+| **Enum bypass** | Whitelist validation |
+| **Malicious PDF** | Magic bytes + reject `/JavaScript`, `/OpenAction` |
+
+### Tests
+
+Cada validación debe tener tests unitarios + tests de integración que prueban payloads maliciosos reales (XSS, SQLi, NoSQL injection, overflow).
 
 ---
 

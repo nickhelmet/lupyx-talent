@@ -6,6 +6,7 @@ import { getCorsHeaders } from "./corsConfig";
 import { verifyAuth } from "./authMiddleware";
 import { rateLimit } from "./rateLimiter";
 import { createNotification } from "./notifications";
+import { sanitizeString, validatePhone, validateDNI, validateEducationLevel } from "./validation";
 
 export const submitApplication = onRequest({ maxInstances: 5 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
@@ -19,16 +20,26 @@ export const submitApplication = onRequest({ maxInstances: 5 }, async (req, res)
   if (!(await rateLimit(req, res, "submitApplication", user.uid))) return;
 
   try {
-    const {
-      jobId, firstName, lastName, phone, address, city,
-      birthDate, educationLevel, dni, coverLetter,
-      cvFileName, cvBase64,
-    } = req.body;
+    const raw = req.body;
+
+    const firstName = sanitizeString(raw.firstName);
+    const lastName = sanitizeString(raw.lastName);
+    const phone = validatePhone(raw.phone);
+    const jobId = typeof raw.jobId === "string" ? raw.jobId.replace(/[^a-zA-Z0-9_-]/g, "") : "";
 
     if (!jobId || !firstName || !lastName || !phone) {
-      res.status(400).json({ error: "Missing required fields: jobId, firstName, lastName, phone" });
+      res.status(400).json({ error: "Missing or invalid required fields: jobId, firstName, lastName, phone" });
       return;
     }
+
+    const address = sanitizeString(raw.address) || null;
+    const city = sanitizeString(raw.city) || null;
+    const birthDate = typeof raw.birthDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(raw.birthDate) ? raw.birthDate : null;
+    const educationLevel = validateEducationLevel(raw.educationLevel);
+    const dni = validateDNI(raw.dni);
+    const coverLetter = sanitizeString(raw.coverLetter)?.slice(0, 5000) || null;
+    const cvFileName = typeof raw.cvFileName === "string" ? raw.cvFileName.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 255) : null;
+    const cvBase64 = typeof raw.cvBase64 === "string" ? raw.cvBase64 : null;
 
     const db = getFirestore();
 

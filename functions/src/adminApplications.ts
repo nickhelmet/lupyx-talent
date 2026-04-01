@@ -3,6 +3,7 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getCorsHeaders } from "./corsConfig";
 import { verifyAuth } from "./authMiddleware";
 import { rateLimit } from "./rateLimiter";
+import { validateApplicationStatus, sanitizeString } from "./validation";
 
 export const adminListApplications = onRequest({ maxInstances: 5 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
@@ -30,9 +31,9 @@ export const updateApplicationStatus = onRequest({ maxInstances: 3 }, async (req
   if (!user?.isAdmin) { res.status(403).json({ error: "Forbidden" }); return; }
   if (!(await rateLimit(req, res, "updateApplicationStatus", user.uid))) return;
 
-  const { applicationId, status } = req.body;
-  const validStatuses = ["PENDING", "REVIEWING", "INTERVIEW", "REJECTED", "ACCEPTED", "HIRED"];
-  if (!applicationId || !validStatuses.includes(status)) {
+  const applicationId = typeof req.body.applicationId === "string" ? req.body.applicationId.replace(/[^a-zA-Z0-9_-]/g, "") : "";
+  const status = validateApplicationStatus(req.body.status);
+  if (!applicationId || !status) {
     res.status(400).json({ error: "Invalid applicationId or status" }); return;
   }
 
@@ -54,13 +55,34 @@ export const addInterviewNotes = onRequest({ maxInstances: 3 }, async (req, res)
   if (!user?.isAdmin) { res.status(403).json({ error: "Forbidden" }); return; }
   if (!(await rateLimit(req, res, "addInterviewNotes", user.uid))) return;
 
-  const { applicationId, scores, interviewMeta } = req.body;
+  const applicationId = typeof req.body.applicationId === "string" ? req.body.applicationId.replace(/[^a-zA-Z0-9_-]/g, "") : "";
   if (!applicationId) { res.status(400).json({ error: "Missing applicationId" }); return; }
 
   const db = getFirestore();
   const updates: Record<string, unknown> = { updatedAt: FieldValue.serverTimestamp() };
-  if (scores) updates.scores = scores;
-  if (interviewMeta) updates.interviewMeta = interviewMeta;
+
+  // Sanitize scores (0-10 range)
+  if (req.body.scores && typeof req.body.scores === "object") {
+    const s = req.body.scores;
+    const clamp = (v: unknown) => typeof v === "number" ? Math.max(0, Math.min(10, v)) : null;
+    updates.scores = {
+      technical: clamp(s.technical),
+      communication: clamp(s.communication),
+      experience: clamp(s.experience),
+      motivation: clamp(s.motivation),
+      overall: clamp(s.overall),
+    };
+  }
+
+  // Sanitize interview meta
+  if (req.body.interviewMeta && typeof req.body.interviewMeta === "object") {
+    const m = req.body.interviewMeta;
+    updates.interviewMeta = {
+      date: typeof m.date === "string" ? m.date.slice(0, 30) : null,
+      interviewer: sanitizeString(m.interviewer).slice(0, 100),
+      notes: sanitizeString(m.notes).slice(0, 5000),
+    };
+  }
 
   await db.doc(`applications/${applicationId}`).update(updates);
   res.status(200).json({ message: "Notes updated" });
