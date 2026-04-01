@@ -11,11 +11,11 @@ describe("analytics", () => {
     expect(track.contactClick).toBeDefined();
     expect(track.login).toBeDefined();
     expect(track.signup).toBeDefined();
+    expect(track.darkModeToggle).toBeDefined();
   });
 
   it("track functions are callable without errors", async () => {
-    // These should not throw even without Firebase initialized
-    await expect(track.jobView("test-job")).resolves.not.toThrow();
+    await expect(track.jobView("test-job", "Test Job")).resolves.not.toThrow();
     await expect(track.linkedinClick()).resolves.not.toThrow();
     await expect(track.login()).resolves.not.toThrow();
   });
