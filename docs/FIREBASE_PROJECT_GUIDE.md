@@ -991,58 +991,98 @@ Genera PRs automáticos cuando detecta dependencias con vulnerabilidades conocid
 
 ### Rate limiting en Cloud Functions (crítico para Blaze)
 
-Con plan Blaze, cada invocación tiene costo. Sin rate limiting, un atacante puede generar costos significativos. **Implementar ANTES de ir a producción.**
+Con plan Blaze, cada invocación tiene costo. **Implementar ANTES de ir a producción.**
 
-**Patrón de implementación:**
+**Implementación recomendada: in-memory (Map<>)**
 
 ```typescript
-// rateLimiter.ts — Firestore-backed, por endpoint y por usuario/IP
+// rateLimiter.ts — in-memory, $0 por check
+const store = new Map<string, { count: number; resetAt: number }>();
+
 export async function rateLimit(req, res, endpoint, userId?) {
-  // 1. Identificar: userId si autenticado, IP si público
-  // 2. Leer contador de Firestore (rate_limits/{endpoint}_{identifier})
-  // 3. Si ventana expiró → resetear contador
-  // 4. Si excede límite → 429 + headers
-  // 5. Si OK → incrementar + permitir
+  const key = `${endpoint}:${userId || getIP(req)}`;
+  const entry = store.get(key);
+  // Si expiró o no existe → crear nuevo
+  // Si excede límite → 429 + headers
+  // Si OK → incrementar + permitir
 }
 ```
 
+**¿Por qué in-memory y no Firestore?** Cada check de Firestore = 2 operaciones ($$$). In-memory = $0. Se resetea en cold starts, lo cual es aceptable con maxInstances + App Check.
+
 **Integración en cada función:**
 ```typescript
-export const myFunction = onRequest(async (req, res) => {
+export const myFunction = onRequest({ maxInstances: 1 }, async (req, res) => {
   // CORS, method check...
+  if (!(await verifyAppCheck(req))) { res.status(403)...; return; }  // ← App Check
   const user = await verifyAuth(req);
   if (!user) { res.status(401)... }
-  if (!(await rateLimit(req, res, "myFunction", user.uid))) return; // ← esta línea
+  if (!(await rateLimit(req, res, "myFunction", user.uid))) return;  // ← Rate limit
   // ... lógica de negocio
 });
 ```
 
-**Fail open:** Si el rate limiter falla (error de Firestore), permite el request pero loguea el error. Mejor servir que bloquear por un bug.
+### Backup de Firestore
 
-**Costo del rate limiter:** Cada check = 1 read + 1 write de Firestore. Para endpoints de alto tráfico, considerar cache in-memory o Upstash Redis.
+```typescript
+// Scheduled Cloud Function — exporta Firestore a Cloud Storage
+// Activar solo cuando haya datos reales (genera costo ~$0.01-0.05/día)
+export const scheduledBackup = onSchedule(
+  { schedule: "0 3 * * *", maxInstances: 1 },
+  async () => { /* export to gs://proyecto-backups/firestore/YYYY-MM-DD */ }
+);
+```
+
+**Recomendación:** Dejar desactivado (comentado en index.ts) hasta que haya datos de producción. Documentar en un issue para activar cuando sea necesario.
+
+### Features y costos — referencia rápida
+
+| Feature | Costo en idle | Costo por uso | Notas |
+|---------|:------------:|:------------:|-------|
+| Hosting (SPA estática) | $0 | $0 | CDN, free tier generous |
+| Firestore | $0 | $0.06/100k reads | Free: 50k reads/day |
+| Storage | $0 | $0.026/GB/month | Free: 5GB |
+| Auth | $0 | $0 | Free: 50k MAU |
+| Cloud Functions | $0 | $0.40/million | Free: 2M/month |
+| App Check / reCAPTCHA v3 | $0 | $0 | Gratis |
+| Scheduled backup | ~$0.01/día | — | Activar cuando necesario |
 
 ---
 
 ## Checklist de lanzamiento
 
-### Pre-launch
-- [ ] Dominio custom configurado con SSL
-- [ ] Security headers configurados
+### Pre-launch (obligatorio)
+- [ ] Dominio custom configurado con SSL (Cloudflare DNS only)
+- [ ] Authorized redirect URIs en Google Cloud Console
+- [ ] Security headers en firebase.json (CSP, HSTS, X-Frame-Options)
 - [ ] Firestore y Storage rules en deny-all
-- [ ] Firebase Auth providers habilitados
-- [ ] Cloud Functions deployadas
-- [ ] App Check habilitado
-- [ ] Budget alerts configurados
-- [ ] CI/CD pipeline funcionando
-- [ ] Tests pasando
+- [ ] Firebase Auth: Google provider habilitado + dominios autorizados
+- [ ] Cloud Functions deployadas con maxInstances: 1
+- [ ] App Check habilitado (reCAPTCHA v3)
+- [ ] Rate limiting in-memory activo en todas las functions
+- [ ] Input validation/sanitization en todos los endpoints
+- [ ] Allowlist configurada con usuarios autorizados
+- [ ] Budget alerts configurados ($5, $10)
+- [ ] CI/CD pipeline: lint + typecheck + tests + build + auto-deploy
+- [ ] Tests pasando (frontend + functions)
+- [ ] Dependabot habilitado
+- [ ] npm audit sin vulnerabilidades críticas
+- [ ] Modo mantenimiento funcionando (quitar cuando listo)
+
+### Pre-launch (recomendado)
 - [ ] Analytics configurado
+- [ ] Backup de Firestore (activar cuando haya datos reales)
+- [ ] Error monitoring (Sentry o Cloud Error Reporting)
+- [ ] Uptime checks en Cloud Monitoring
 
 ### Post-launch
 - [ ] Verificar uptime y latency
-- [ ] Verificar que analytics recolecta datos
-- [ ] Monitorear costos en primeras 48hs
-- [ ] Verificar que rate limiting funciona
+- [ ] Verificar analytics recolecta datos
+- [ ] Monitorear costos en primeras 48hs (Firebase Console → Usage)
+- [ ] Verificar rate limiting funciona (`curl` directo → 403 App Check)
 - [ ] Probar flujo completo como usuario nuevo
+- [ ] Probar Google Sign-In en mobile
+- [ ] Verificar dark mode en todos los browsers
 
 ---
 

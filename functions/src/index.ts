@@ -17,5 +17,5 @@ export { listUsers, updateUserRole, toggleUserStatus, adminDashboard } from "./a
 export { fraudAnalysis } from "./fraudDetection";
 export { getAllowlist, addAllowlistEmail, removeAllowlistEmail } from "./adminAllowlist";
 
-// Scheduled
-export { scheduledBackup } from "./backup";
+// Scheduled — disabled to avoid costs while no production data (see issue #99)
+// export { scheduledBackup } from "./backup";

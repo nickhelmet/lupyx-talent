@@ -186,8 +186,33 @@ Sin estos, el login falla con `redirect_uri_mismatch` (Error 400).
 5. Chequea allowlist en Firestore (cache 5min)
 6. Retorna datos o 401/403
 
+## Backup
+
+**Estado: DESACTIVADO** (sin datos de producción, evita costos innecesarios).
+
+Implementado en `functions/src/backup.ts`. Para activar: descomentar export en `index.ts` y deploy. Ver issue #99.
+
+---
+
 ## Deploy Pipeline
 
 ```
-PR → Lint + TypeCheck + Build → Merge → Auto-deploy Firebase Hosting
+PR → Lint + TypeCheck + 56 Tests → Build → Merge → Auto-deploy Firebase Hosting
+Functions: manual `firebase deploy --only functions` (o agregar al CI)
 ```
+
+## Resumen de protecciones
+
+| Capa | Implementación | Costo |
+|------|---------------|-------|
+| maxInstances: 1 | Todas las functions | $0 |
+| App Check (reCAPTCHA v3) | Frontend + Cloud Functions | $0 |
+| Rate limiting in-memory | Todas las functions | $0 |
+| Auth middleware + allowlist | Endpoints protegidos | $0 |
+| Input validation/sanitization | Todos los campos | $0 |
+| Firestore/Storage rules deny-all | Config | $0 |
+| Security headers (CSP, HSTS, etc.) | firebase.json | $0 |
+| Dependabot | GitHub | $0 |
+| Budget alerts | Google Cloud | $0 |
+
+**Costo fijo mensual sin tráfico: $0.** Costo máximo bajo ataque: ~$3/mes.
