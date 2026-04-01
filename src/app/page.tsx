@@ -1,4 +1,3 @@
-import MaintenanceGate from "@/components/MaintenanceGate";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import ActiveSearches from "@/components/ActiveSearches";
@@ -9,14 +8,16 @@ import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
-    <MaintenanceGate>
+    <>
       <Header />
-      <Hero />
-      <ActiveSearches />
-      <AboutUs />
-      <Testimonials />
-      <Contact />
+      <main id="main-content">
+        <Hero />
+        <ActiveSearches />
+        <AboutUs />
+        <Testimonials />
+        <Contact />
+      </main>
       <Footer />
-    </MaintenanceGate>
+    </>
   );
 }

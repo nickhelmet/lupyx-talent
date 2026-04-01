@@ -1,12 +1,36 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
-import { LogOut, User, FileText } from "lucide-react";
+import { LogOut, FileText, Loader2 } from "lucide-react";
+import { fetchMyApplications } from "@/services/api";
+import type { Application } from "@/types";
+
+const statusLabels: Record<string, string> = {
+  PENDING: "Pendiente",
+  REVIEWING: "En revisión",
+  INTERVIEW: "Entrevista",
+  ACCEPTED: "Aceptada",
+  REJECTED: "Rechazada",
+  HIRED: "Contratado",
+};
 
 export default function MiCuenta() {
   const { user, loading, logout, loginWithGoogle } = useAuth();
   const router = useRouter();
+  const [apps, setApps] = useState<Application[]>([]);
+  const [appsLoading, setAppsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user || loading) return;
+    let cancelled = false;
+    fetchMyApplications()
+      .then((data) => { if (!cancelled) setApps(data); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setAppsLoading(false); });
+    return () => { cancelled = true; };
+  }, [user, loading]);
 
   if (loading) {
     return (
@@ -45,40 +69,43 @@ export default function MiCuenta() {
           <div className="flex items-center gap-4">
             <img
               src={user.photoURL || ""}
-              alt=""
+              alt="Foto de perfil"
               className="h-16 w-16 rounded-full"
               referrerPolicy="no-referrer"
             />
             <div>
-              <h1 className="text-xl font-bold text-[#0B1F3B] dark:text-white">
-                {user.displayName}
-              </h1>
+              <h1 className="text-xl font-bold text-[#0B1F3B] dark:text-white">{user.displayName}</h1>
               <p className="text-sm text-[#1F4E79]/60 dark:text-gray-400">{user.email}</p>
             </div>
           </div>
 
-          <div className="mt-8 space-y-3">
-            <a
-              href="#"
-              className="flex items-center gap-3 rounded-xl border border-gray-100 p-4 transition-colors hover:border-[#2EC4B6]/30 dark:border-white/10"
-            >
-              <User className="h-5 w-5 text-[#4FA3D1]" />
-              <div>
-                <p className="font-medium text-[#0B1F3B] dark:text-white">Mi perfil</p>
-                <p className="text-xs text-[#1F4E79]/50 dark:text-gray-500">Completar datos personales</p>
-              </div>
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-3 rounded-xl border border-gray-100 p-4 transition-colors hover:border-[#2EC4B6]/30 dark:border-white/10"
-            >
-              <FileText className="h-5 w-5 text-[#2EC4B6]" />
-              <div>
-                <p className="font-medium text-[#0B1F3B] dark:text-white">Mis postulaciones</p>
-                <p className="text-xs text-[#1F4E79]/50 dark:text-gray-500">Ver estado de tus aplicaciones</p>
-              </div>
-            </a>
-          </div>
+          <h2 className="mt-8 flex items-center gap-2 text-sm font-semibold text-[#0B1F3B] dark:text-white">
+            <FileText className="h-4 w-4 text-[#2EC4B6]" /> Mis postulaciones
+          </h2>
+
+          {appsLoading ? (
+            <div className="mt-4 flex items-center gap-2 text-sm text-[#1F4E79]/50">
+              <Loader2 className="h-4 w-4 animate-spin" /> Cargando...
+            </div>
+          ) : apps.length === 0 ? (
+            <p className="mt-4 text-sm text-[#1F4E79]/50 dark:text-gray-500">
+              No te has postulado a ninguna búsqueda todavía.
+            </p>
+          ) : (
+            <div className="mt-4 space-y-3">
+              {apps.map((app) => (
+                <div key={app.id} className="flex items-center justify-between rounded-xl border border-gray-100 p-3 dark:border-white/10">
+                  <div>
+                    <p className="text-sm font-medium text-[#0B1F3B] dark:text-white">{app.jobTitle}</p>
+                    <p className="text-xs text-[#1F4E79]/50 dark:text-gray-500">{app.jobCompany}</p>
+                  </div>
+                  <span className="rounded-full bg-[#2EC4B6]/10 px-3 py-1 text-xs font-semibold text-[#2EC4B6]">
+                    {statusLabels[app.status] || app.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
 
           <button
             onClick={logout}
