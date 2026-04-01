@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { submitApplication } from "@/services/api";
-import { ArrowLeft, Send, Loader2 } from "lucide-react";
+import { ArrowLeft, Send, Loader2, Upload, FileText, X } from "lucide-react";
 
 const educationOptions = [
   { value: "PRIMARY", label: "Primario" },
@@ -23,6 +23,7 @@ export default function PostularClient() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cvFile, setCvFile] = useState<File | null>(null);
 
   if (authLoading) {
     return (
@@ -72,6 +73,23 @@ export default function PostularClient() {
     setSubmitting(true);
     setError(null);
     const form = new FormData(e.currentTarget);
+
+    if (!cvFile) {
+      setError("Debés adjuntar tu CV en formato PDF");
+      setSubmitting(false);
+      return;
+    }
+
+    let cvBase64 = "";
+    try {
+      const buffer = await cvFile.arrayBuffer();
+      cvBase64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+    } catch {
+      setError("Error al procesar el archivo");
+      setSubmitting(false);
+      return;
+    }
+
     try {
       await submitApplication({
         jobId: slug,
@@ -84,6 +102,8 @@ export default function PostularClient() {
         educationLevel: form.get("educationLevel"),
         dni: form.get("dni"),
         coverLetter: form.get("coverLetter"),
+        cvFileName: cvFile.name,
+        cvBase64,
       });
       setSuccess(true);
     } catch (err) {
@@ -164,6 +184,46 @@ export default function PostularClient() {
           <div>
             <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">Carta de presentación</label>
             <textarea name="coverLetter" rows={4} placeholder="Contanos por qué te interesa esta posición..." className={`${inputClass} resize-none`} />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">CV (PDF, máx 5MB) *</label>
+            {cvFile ? (
+              <div className="flex items-center justify-between rounded-xl border border-[#2EC4B6]/30 bg-[#2EC4B6]/5 px-4 py-3">
+                <div className="flex items-center gap-2 text-sm text-[#0B1F3B] dark:text-white">
+                  <FileText className="h-4 w-4 text-[#2EC4B6]" />
+                  <span className="truncate max-w-[200px]">{cvFile.name}</span>
+                  <span className="text-xs text-[#1F4E79]/50">({(cvFile.size / 1024 / 1024).toFixed(1)} MB)</span>
+                </div>
+                <button type="button" onClick={() => setCvFile(null)} className="text-[#1F4E79]/40 hover:text-red-500">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-gray-200 px-4 py-6 transition-colors hover:border-[#2EC4B6] dark:border-white/10">
+                <Upload className="h-6 w-6 text-[#4FA3D1]" />
+                <span className="text-sm text-[#1F4E79]/60 dark:text-gray-400">Click para seleccionar PDF</span>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    if (file.size > 5 * 1024 * 1024) {
+                      setError("El archivo no puede superar 5MB");
+                      return;
+                    }
+                    if (file.type !== "application/pdf") {
+                      setError("Solo se aceptan archivos PDF");
+                      return;
+                    }
+                    setError(null);
+                    setCvFile(file);
+                  }}
+                />
+              </label>
+            )}
           </div>
 
           <button

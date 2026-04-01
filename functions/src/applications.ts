@@ -1,5 +1,7 @@
 import { onRequest } from "firebase-functions/v2/https";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { getStorage } from "firebase-admin/storage";
+import { createHash } from "crypto";
 import { getCorsHeaders } from "./corsConfig";
 import { verifyAuth } from "./authMiddleware";
 import { rateLimit } from "./rateLimiter";
@@ -19,6 +21,7 @@ export const submitApplication = onRequest({ maxInstances: 5 }, async (req, res)
     const {
       jobId, firstName, lastName, phone, address, city,
       birthDate, educationLevel, dni, coverLetter,
+      cvFileName, cvBase64,
     } = req.body;
 
     if (!jobId || !firstName || !lastName || !phone) {
@@ -47,6 +50,34 @@ export const submitApplication = onRequest({ maxInstances: 5 }, async (req, res)
       return;
     }
 
+    // Upload CV to Firebase Storage
+    let cvPath: string | null = null;
+    let cvHash: string | null = null;
+    let cvSize: number | null = null;
+
+    if (cvBase64 && cvFileName) {
+      const buffer = Buffer.from(cvBase64, "base64");
+
+      // Validate PDF magic bytes
+      if (buffer.length < 4 || buffer.subarray(0, 4).toString() !== "%PDF") {
+        res.status(400).json({ error: "Invalid PDF file" }); return;
+      }
+
+      if (buffer.length > 5 * 1024 * 1024) {
+        res.status(400).json({ error: "File too large (max 5MB)" }); return;
+      }
+
+      cvHash = createHash("sha256").update(buffer).digest("hex");
+      cvSize = buffer.length;
+      cvPath = `cvs/${user.uid}/${Date.now()}-${cvFileName.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+
+      const bucket = getStorage().bucket();
+      await bucket.file(cvPath).save(buffer, {
+        contentType: "application/pdf",
+        metadata: { cacheControl: "private, max-age=31536000" },
+      });
+    }
+
     const jobData = jobDoc.data()!;
     const application = {
       userId: user.uid,
@@ -63,9 +94,9 @@ export const submitApplication = onRequest({ maxInstances: 5 }, async (req, res)
       educationLevel: educationLevel || null,
       dni: dni || null,
       coverLetter: coverLetter || null,
-      cvPath: null,
-      cvHash: null,
-      cvSize: null,
+      cvPath,
+      cvHash,
+      cvSize,
       status: "PENDING",
       appliedAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
