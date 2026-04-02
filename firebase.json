@@ -60,6 +60,7 @@
       { "source": "/api/admin/applications/comment", "function": "addComment" },
       { "source": "/api/admin/applications/detail", "function": "getApplicationDetail" },
       { "source": "/api/admin/applications/analyze-cv", "function": "analyzeCv" },
+      { "source": "/api/admin/cv/download", "function": "downloadCv" },
       { "source": "**", "destination": "/index.html" }
     ]
   },

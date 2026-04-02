@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Loader2, MessageSquare, ChevronDown, ChevronUp, Send, Sparkles } from "lucide-react";
+import { Search, Loader2, MessageSquare, ChevronDown, ChevronUp, Send, Sparkles, Download } from "lucide-react";
 import { adminFetch } from "@/services/adminApi";
 import type { Application, ApplicationStatus } from "@/types";
 
@@ -24,6 +24,16 @@ const statusLabels: Record<string, string> = {
 };
 
 const statusFlow: ApplicationStatus[] = ["PENDING", "REVIEWING", "INTERVIEW", "ACCEPTED", "REJECTED", "HIRED"];
+
+const educationLabels: Record<string, string> = {
+  PRIMARY: "Primario",
+  SECONDARY: "Secundario",
+  TERTIARY: "Terciario",
+  UNIVERSITY: "Universitario",
+  POSTGRADUATE: "Posgrado",
+  MASTER: "Maestría",
+  PHD: "Doctorado",
+};
 
 interface Comment {
   text: string;
@@ -214,9 +224,31 @@ export default function AdminApplications() {
                   </div>
                   <div>
                     <span className="text-[#1F4E79]/50 dark:text-gray-500">Educación:</span>{" "}
-                    <span className="text-[#0B1F3B] dark:text-white">{app.educationLevel || "—"}</span>
+                    <span className="text-[#0B1F3B] dark:text-white">{educationLabels[app.educationLevel || ""] || app.educationLevel || "—"}</span>
                   </div>
                 </div>
+
+                {/* CV download */}
+                {app.cvPath && (
+                  <div className="mt-3">
+                    <button
+                      onClick={async () => {
+                        try {
+                          const { url } = await adminFetch("downloadCv", {
+                            method: "POST",
+                            body: JSON.stringify({ path: app.cvPath }),
+                          });
+                          window.open(url, "_blank");
+                        } catch {
+                          setError("Error al descargar CV");
+                        }
+                      }}
+                      className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#1F4E79]/10 px-3 py-2 text-xs font-semibold text-[#1F4E79] transition-colors hover:bg-[#1F4E79]/20 dark:bg-white/10 dark:text-gray-300"
+                    >
+                      <Download className="h-3.5 w-3.5" /> Descargar CV
+                    </button>
+                  </div>
+                )}
 
                 {app.coverLetter && (
                   <div className="mt-3">

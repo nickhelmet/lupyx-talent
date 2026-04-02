@@ -18,6 +18,7 @@ export { fraudAnalysis } from "./fraudDetection";
 export { getAllowlist, addAllowlistEmail, removeAllowlistEmail } from "./adminAllowlist";
 export { addComment, getApplicationDetail } from "./adminComments";
 export { analyzeCv } from "./cvAnalysis";
+export { downloadCv } from "./downloadCv";
 
 // SEO
 export { sitemap } from "./sitemap";
