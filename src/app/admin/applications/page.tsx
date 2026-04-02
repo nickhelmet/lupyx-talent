@@ -92,6 +92,7 @@ export default function AdminApplications() {
   const [analyzing, setAnalyzing] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const perPage = 10;
+  const [interviewForm, setInterviewForm] = useState<string | null>(null);
 
   async function loadApps() {
     try {
@@ -217,6 +218,22 @@ export default function AdminApplications() {
             Limpiar filtros
           </button>
         )}
+        <button
+          onClick={() => {
+            const headers = "Nombre,Apellido,Email,Puesto,Estado,Teléfono,Ciudad,Fecha\n";
+            const rows = filtered.map((a) =>
+              `"${a.firstName || ""}","${a.lastName || ""}","${a.email || ""}","${a.jobTitle || ""}","${statusLabels[a.status] || a.status}","${a.phone || ""}","${a.city || ""}","${a.appliedAt || ""}"`
+            ).join("\n");
+            const blob = new Blob([headers + rows], { type: "text/csv" });
+            const url = URL.createObjectURL(blob);
+            const el = document.createElement("a");
+            el.href = url; el.download = `postulaciones-${new Date().toISOString().split("T")[0]}.csv`; el.click();
+            URL.revokeObjectURL(url);
+          }}
+          className="cursor-pointer text-xs font-medium text-[#1F4E79] hover:text-[#2EC4B6] dark:text-gray-400"
+        >
+          Exportar CSV
+        </button>
       </div>
 
       {error && (
@@ -326,6 +343,63 @@ export default function AdminApplications() {
                   <div className="mt-3">
                     <p className="text-xs font-semibold text-[#1F4E79]/50 dark:text-gray-500">Carta de presentación</p>
                     <p className="mt-1 text-sm text-[#1F4E79]/80 dark:text-gray-300">{app.coverLetter}</p>
+                  </div>
+                )}
+
+                {/* Schedule Interview */}
+                {app.status === "INTERVIEW" && (
+                  <div className="mt-4">
+                    {interviewForm === app.id ? (
+                      <form
+                        onSubmit={async (e) => {
+                          e.preventDefault();
+                          const form = new FormData(e.currentTarget);
+                          try {
+                            await adminFetch("manageInterviewRounds", {
+                              method: "POST",
+                              body: JSON.stringify({
+                                applicationId: app.id,
+                                type: form.get("type"),
+                                scheduledDate: form.get("date"),
+                                meetingLink: form.get("link"),
+                                interviewerName: form.get("interviewer"),
+                                roundNumber: 1,
+                                status: "SCHEDULED",
+                              }),
+                            });
+                            setInterviewForm(null);
+                            await loadApps();
+                          } catch (err) {
+                            setError(err instanceof Error ? err.message : "Error");
+                          }
+                        }}
+                        className="rounded-xl border border-purple-200 bg-purple-50 p-4 dark:border-purple-800 dark:bg-purple-900/20"
+                      >
+                        <p className="text-xs font-semibold text-purple-700 dark:text-purple-300">Agendar entrevista</p>
+                        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                          <input name="date" type="datetime-local" required className="rounded-lg border border-purple-200 bg-white px-3 py-2 text-sm outline-none dark:border-purple-700 dark:bg-white/5 dark:text-white" />
+                          <select name="type" className="rounded-lg border border-purple-200 bg-white px-3 py-2 text-sm outline-none dark:border-purple-700 dark:bg-white/5 dark:text-white">
+                            <option value="VIDEO">Video</option>
+                            <option value="PHONE">Teléfono</option>
+                            <option value="PRESENTIAL">Presencial</option>
+                            <option value="TECHNICAL">Técnica</option>
+                          </select>
+                          <input name="link" placeholder="Link de Meet/Zoom" className="rounded-lg border border-purple-200 bg-white px-3 py-2 text-sm outline-none dark:border-purple-700 dark:bg-white/5 dark:text-white" />
+                          <input name="interviewer" placeholder="Entrevistador" className="rounded-lg border border-purple-200 bg-white px-3 py-2 text-sm outline-none dark:border-purple-700 dark:bg-white/5 dark:text-white" />
+                        </div>
+                        <div className="mt-3 flex gap-2">
+                          <button type="submit" className="rounded-lg bg-purple-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-purple-700">Agendar</button>
+                          <button type="button" onClick={() => setInterviewForm(null)} className="text-xs text-purple-600 hover:underline">Cancelar</button>
+                        </div>
+                      </form>
+                    ) : (
+                      <button
+                        onClick={() => setInterviewForm(app.id)}
+                        className="cursor-pointer text-xs font-semibold text-purple-600 hover:underline dark:text-purple-400"
+                      >
+                        + Agendar entrevista
+                      </button>
+                    )}
                   </div>
                 )}
 

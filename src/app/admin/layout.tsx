@@ -12,7 +12,8 @@ import {
   LogOut,
   Menu,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { adminFetch } from "@/services/adminApi";
 
 const sidebarLinks = [
   { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
@@ -26,6 +27,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+
+  useEffect(() => {
+    if (!user || loading) return;
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      adminFetch("adminDashboard")
+        .then((data: { pendingApplications?: number }) => {
+          if (!cancelled) setPendingCount(data.pendingApplications || 0);
+        })
+        .catch(() => {});
+    }, 800);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [user, loading, pathname]);
 
   if (loading) {
     return (
@@ -75,7 +90,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 }`}
               >
                 <link.icon className="h-4 w-4" />
-                {link.label}
+                <span className="flex-1">{link.label}</span>
+                {link.href === "/admin/applications" && pendingCount > 0 && (
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
+                    {pendingCount}
+                  </span>
+                )}
               </Link>
             );
           })}
