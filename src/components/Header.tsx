@@ -8,10 +8,10 @@ import UserMenu from "./UserMenu";
 import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
-  { href: "#inicio", label: "Inicio" },
-  { href: "#busquedas", label: "Búsquedas" },
-  { href: "#nosotros", label: "Nosotros" },
-  { href: "#contacto", label: "Contacto" },
+  { href: "/", label: "Inicio" },
+  { href: "/busquedas", label: "Búsquedas" },
+  { href: "/#nosotros", label: "Nosotros" },
+  { href: "/#contacto", label: "Contacto" },
 ];
 
 export default function Header() {

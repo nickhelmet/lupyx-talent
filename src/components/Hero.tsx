@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
+import Link from "next/link";
 
 export default function Hero() {
   return (
@@ -98,15 +99,15 @@ export default function Hero() {
             transition={{ delay: 0.6, duration: 0.6 }}
             className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
           >
-            <a
-              href="#busquedas"
+            <Link
+              href="/busquedas"
               className="group rounded-full bg-[#2EC4B6] px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-[#2EC4B6]/25 transition-all hover:bg-[#26a89c] hover:shadow-xl hover:shadow-[#2EC4B6]/30"
             >
               Ver búsquedas activas
               <span className="ml-2 inline-block transition-transform group-hover:translate-x-1">
                 →
               </span>
-            </a>
+            </Link>
             <a
               href="#nosotros"
               className="rounded-full border border-white/20 px-8 py-3.5 text-base font-medium text-white transition-all hover:border-white/40 hover:bg-white/5"

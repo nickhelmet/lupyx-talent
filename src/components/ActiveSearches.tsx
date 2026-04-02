@@ -141,9 +141,9 @@ export default function ActiveSearches() {
                 </span>
               </div>
 
-              <h3 className="text-xl font-bold text-[#0B1F3B] dark:text-white sm:text-2xl">
+              <a href={`/busquedas/${job.id}`} className="text-xl font-bold text-[#0B1F3B] transition-colors hover:text-[#2EC4B6] dark:text-white sm:text-2xl">
                 {job.title}
-              </h3>
+              </a>
               <p className="mt-1 text-sm font-medium text-[#1F4E79]/70 dark:text-gray-400">
                 {job.company}
               </p>
