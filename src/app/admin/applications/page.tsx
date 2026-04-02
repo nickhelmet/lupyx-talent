@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Loader2, MessageSquare, ChevronDown, ChevronUp, Send } from "lucide-react";
+import { Search, Loader2, MessageSquare, ChevronDown, ChevronUp, Send, Sparkles } from "lucide-react";
 import { adminFetch } from "@/services/adminApi";
 import type { Application, ApplicationStatus } from "@/types";
 
@@ -32,9 +32,22 @@ interface Comment {
   createdAt: string;
 }
 
-interface AppWithComments extends Application {
-  comments?: Comment[];
+interface CvAnalysis {
+  is_cv: boolean;
+  summary?: string;
+  skills?: string[];
+  experience?: Array<{ company: string; position: string; period: string }>;
+  education?: Array<{ institution: string; degree: string; year: string }>;
+  languages?: string[];
+  seniority_level?: string;
+  total_years_experience?: number;
 }
+
+type AppWithComments = Application & {
+  comments?: Comment[];
+  cvAnalysis?: CvAnalysis;
+  cvAnalyzedAt?: string;
+};
 
 export default function AdminApplications() {
   const [apps, setApps] = useState<AppWithComments[]>([]);
@@ -45,6 +58,7 @@ export default function AdminApplications() {
   const [commentText, setCommentText] = useState("");
   const [commentInternal, setCommentInternal] = useState(false);
   const [sending, setSending] = useState(false);
+  const [analyzing, setAnalyzing] = useState<string | null>(null);
 
   async function loadApps() {
     try {
@@ -72,6 +86,21 @@ export default function AdminApplications() {
       await loadApps();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
+    }
+  }
+
+  async function runCvAnalysis(appId: string) {
+    setAnalyzing(appId);
+    try {
+      await adminFetch("analyzeCv", {
+        method: "POST",
+        body: JSON.stringify({ applicationId: appId }),
+      });
+      await loadApps();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error analyzing CV");
+    } finally {
+      setAnalyzing(null);
     }
   }
 
@@ -195,6 +224,98 @@ export default function AdminApplications() {
                     <p className="mt-1 text-sm text-[#1F4E79]/80 dark:text-gray-300">{app.coverLetter}</p>
                   </div>
                 )}
+
+                {/* CV Analysis */}
+                <div className="mt-4">
+                  <div className="flex items-center justify-between">
+                    <p className="flex items-center gap-1.5 text-xs font-semibold text-[#1F4E79]/50 dark:text-gray-500">
+                      <Sparkles className="h-3.5 w-3.5" /> Análisis de CV (Gemini)
+                    </p>
+                    {app.cvPath && (
+                      <button
+                        onClick={() => runCvAnalysis(app.id)}
+                        disabled={analyzing === app.id}
+                        className="flex items-center gap-1.5 rounded-lg bg-[#1F4E79] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0B1F3B] disabled:opacity-50"
+                      >
+                        {analyzing === app.id ? (
+                          <><Loader2 className="h-3 w-3 animate-spin" /> Analizando...</>
+                        ) : app.cvAnalysis ? (
+                          <><Sparkles className="h-3 w-3" /> Re-analizar</>
+                        ) : (
+                          <><Sparkles className="h-3 w-3" /> Analizar CV</>
+                        )}
+                      </button>
+                    )}
+                  </div>
+
+                  {app.cvAnalysis ? (
+                    <div className="mt-2 space-y-3 rounded-xl border border-[#2EC4B6]/20 bg-[#2EC4B6]/5 p-4">
+                      {app.cvAnalysis.summary && (
+                        <div>
+                          <p className="text-xs font-semibold text-[#2EC4B6]">Resumen</p>
+                          <p className="mt-1 text-sm text-[#0B1F3B] dark:text-gray-200">{app.cvAnalysis.summary}</p>
+                        </div>
+                      )}
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {app.cvAnalysis.seniority_level && (
+                          <div>
+                            <p className="text-xs text-[#1F4E79]/50">Seniority</p>
+                            <p className="text-sm font-medium text-[#0B1F3B] dark:text-white">{app.cvAnalysis.seniority_level}</p>
+                          </div>
+                        )}
+                        {app.cvAnalysis.total_years_experience != null && (
+                          <div>
+                            <p className="text-xs text-[#1F4E79]/50">Años de experiencia</p>
+                            <p className="text-sm font-medium text-[#0B1F3B] dark:text-white">{app.cvAnalysis.total_years_experience}</p>
+                          </div>
+                        )}
+                      </div>
+                      {app.cvAnalysis.skills && app.cvAnalysis.skills.length > 0 && (
+                        <div>
+                          <p className="text-xs text-[#1F4E79]/50">Skills</p>
+                          <div className="mt-1 flex flex-wrap gap-1.5">
+                            {app.cvAnalysis.skills.map((s, i) => (
+                              <span key={i} className="rounded-full bg-white px-2.5 py-0.5 text-xs font-medium text-[#1F4E79] dark:bg-white/10 dark:text-gray-300">{s}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {app.cvAnalysis.experience && app.cvAnalysis.experience.length > 0 && (
+                        <div>
+                          <p className="text-xs text-[#1F4E79]/50">Experiencia</p>
+                          <div className="mt-1 space-y-1">
+                            {app.cvAnalysis.experience.map((e, i) => (
+                              <p key={i} className="text-sm text-[#0B1F3B] dark:text-gray-200">
+                                <span className="font-medium">{e.position}</span> en {e.company} · {e.period}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {app.cvAnalysis.education && app.cvAnalysis.education.length > 0 && (
+                        <div>
+                          <p className="text-xs text-[#1F4E79]/50">Educación</p>
+                          <div className="mt-1 space-y-1">
+                            {app.cvAnalysis.education.map((e, i) => (
+                              <p key={i} className="text-sm text-[#0B1F3B] dark:text-gray-200">
+                                {e.degree} — {e.institution} {e.year && `(${e.year})`}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {app.cvAnalysis.languages && app.cvAnalysis.languages.length > 0 && (
+                        <p className="text-xs text-[#1F4E79]/70 dark:text-gray-400">
+                          Idiomas: {app.cvAnalysis.languages.join(", ")}
+                        </p>
+                      )}
+                    </div>
+                  ) : app.cvPath ? (
+                    <p className="mt-2 text-xs text-[#1F4E79]/40 dark:text-gray-600">CV disponible — presioná Analizar CV para obtener el resumen.</p>
+                  ) : (
+                    <p className="mt-2 text-xs text-[#1F4E79]/40 dark:text-gray-600">Sin CV adjunto.</p>
+                  )}
+                </div>
 
                 {/* Comments */}
                 <div className="mt-4">

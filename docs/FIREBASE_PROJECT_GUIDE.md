@@ -1133,6 +1133,42 @@ Crear `src/app/not-found.tsx` con branding. Usar `Link` de next/link (no `<a>`).
 Forms completos para crear/editar items principales.
 Conectar a Cloud Functions con App Check + Auth token.
 
+### Integración con Gemini (AI)
+
+Para procesar documentos (PDFs, imágenes) con IA:
+
+**1. Obtener API key:**
+- https://aistudio.google.com/apikey → Create API key → seleccionar proyecto
+- Free tier: 1500 requests/día (Gemini Flash)
+
+**2. Configurar secret:**
+```bash
+echo "TU_KEY" | firebase functions:secrets:set GEMINI_API_KEY --project tu-proyecto --data-file -
+```
+
+**3. Cloud Function con secret:**
+```typescript
+export const analyzeDoc = onRequest(
+  { maxInstances: 1, secrets: ["GEMINI_API_KEY"] },
+  async (req, res) => {
+    const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const response = await genai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: [{ role: "user", parts: [
+        { text: "Instrucciones" },
+        { inlineData: { mimeType: "application/pdf", data: base64Data } },
+      ]}],
+      config: { systemInstruction: "...", temperature: 0.1 },
+    });
+    // Parse JSON response
+  }
+);
+```
+
+**Patrón:** system instruction que pide JSON estructurado → parsear con regex `/{[\s\S]*}/` → guardar en Firestore.
+
+**SDK:** `@google/genai` — instalar en functions/.
+
 ### Error Boundary
 `src/components/ErrorBoundary.tsx` wrapping el layout.
 Muestra mensaje branded + botón reload en caso de crash.
