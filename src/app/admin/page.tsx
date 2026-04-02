@@ -152,6 +152,44 @@ export default function AdminDashboard() {
           )}
         </div>
       </div>
+
+      {/* Conversion metrics */}
+      {stats && stats.totalApplications > 0 && (
+        <div className="mt-8 rounded-2xl border border-gray-100 bg-white p-6 dark:border-white/10 dark:bg-white/5">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-[#0B1F3B] dark:text-white">
+            <TrendingUp className="h-4 w-4 text-[#2EC4B6]" /> Métricas de conversión
+          </h2>
+          <div className="mt-4 grid gap-6 sm:grid-cols-3">
+            <div className="text-center">
+              <p className="text-3xl font-bold text-[#0B1F3B] dark:text-white">
+                {stats.totalApplications > 0 ? Math.round(((statusDist["INTERVIEW"] || 0) / stats.totalApplications) * 100) : 0}%
+              </p>
+              <p className="mt-1 text-xs text-[#1F4E79]/60 dark:text-gray-400">Llegan a entrevista</p>
+              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
+                <div className="h-full rounded-full bg-purple-500" style={{ width: `${stats.totalApplications > 0 ? ((statusDist["INTERVIEW"] || 0) / stats.totalApplications) * 100 : 0}%` }} />
+              </div>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-[#0B1F3B] dark:text-white">
+                {stats.totalApplications > 0 ? Math.round((((statusDist["ACCEPTED"] || 0) + (statusDist["HIRED"] || 0)) / stats.totalApplications) * 100) : 0}%
+              </p>
+              <p className="mt-1 text-xs text-[#1F4E79]/60 dark:text-gray-400">Aceptados / Contratados</p>
+              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
+                <div className="h-full rounded-full bg-emerald-500" style={{ width: `${stats.totalApplications > 0 ? (((statusDist["ACCEPTED"] || 0) + (statusDist["HIRED"] || 0)) / stats.totalApplications) * 100 : 0}%` }} />
+              </div>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-[#0B1F3B] dark:text-white">
+                {stats.totalApplications > 0 ? Math.round(((statusDist["REJECTED"] || 0) / stats.totalApplications) * 100) : 0}%
+              </p>
+              <p className="mt-1 text-xs text-[#1F4E79]/60 dark:text-gray-400">Rechazados</p>
+              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
+                <div className="h-full rounded-full bg-red-500" style={{ width: `${stats.totalApplications > 0 ? ((statusDist["REJECTED"] || 0) / stats.totalApplications) * 100 : 0}%` }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
