@@ -49,7 +49,7 @@ Si ES un CV, extraé:
 
 Responde SOLO con JSON válido, sin texto adicional.`;
 
-export const analyzeCv = onRequest({ maxInstances: 1 }, async (req, res) => {
+export const analyzeCv = onRequest({ maxInstances: 1, secrets: ["GEMINI_API_KEY"] }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
