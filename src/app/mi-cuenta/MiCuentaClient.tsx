@@ -126,10 +126,12 @@ export default function MiCuenta() {
                   </div>
                   <div className="mt-3 flex gap-4 text-xs text-[#1F4E79]/50 dark:text-gray-500">
                     {app.appliedAt && (
-                      <span>Postulado: {typeof app.appliedAt === "object" && "_seconds" in (app.appliedAt as Record<string, unknown>)
-                        ? new Date((app.appliedAt as unknown as { _seconds: number })._seconds * 1000).toLocaleDateString("es-AR")
-                        : new Date(app.appliedAt as string).toLocaleDateString("es-AR")
-                      }</span>
+                      <span>Postulado: {(() => {
+                        const d = typeof app.appliedAt === "object" && "_seconds" in (app.appliedAt as Record<string, unknown>)
+                          ? new Date((app.appliedAt as unknown as { _seconds: number })._seconds * 1000)
+                          : new Date(app.appliedAt as string);
+                        return `${d.toLocaleDateString("es-AR")} ${d.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}`;
+                      })()}</span>
                     )}
                   </div>
                   {app.interviewMeta?.notes && (
