@@ -18,12 +18,14 @@ export default function AdminJobs() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<string>("");
+  const [search, setSearch] = useState("");
 
   async function loadJobs() {
     try {
       setError(null);
       const [jobsData, appsData] = await Promise.all([
-        adminFetch("listJobs"),
+        adminFetch("adminListJobs"),
         adminFetch("adminListApplications").catch(() => []),
       ]);
       setJobs(jobsData);
@@ -69,10 +71,35 @@ export default function AdminJobs() {
     );
   }
 
+  const filtered = jobs.filter((j) => {
+    if (filterStatus && j.status !== filterStatus) return false;
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return j.title.toLowerCase().includes(q) || j.company.toLowerCase().includes(q) || j.location?.toLowerCase().includes(q);
+  });
+
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-[#1F4E79]/60 dark:text-gray-400">{jobs.length} búsquedas</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar puesto, empresa..."
+            className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm outline-none focus:border-[#2EC4B6] dark:border-white/10 dark:bg-white/5 dark:text-white"
+          />
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs outline-none dark:border-white/10 dark:bg-white/5 dark:text-white"
+          >
+            <option value="">Todos los estados</option>
+            <option value="ACTIVE">Activas</option>
+            <option value="PAUSED">Pausadas</option>
+            <option value="CLOSED">Cerradas</option>
+          </select>
+          <span className="text-sm text-[#1F4E79]/60 dark:text-gray-400">{filtered.length} búsquedas</span>
+        </div>
         <Link
           href="/admin/jobs/new"
           className="flex items-center gap-2 rounded-full bg-[#2EC4B6] px-5 py-2 text-sm font-semibold text-white hover:bg-[#26a89c]"
@@ -88,12 +115,12 @@ export default function AdminJobs() {
       )}
 
       <div className="mt-6 space-y-3">
-        {jobs.length === 0 && (
+        {filtered.length === 0 && (
           <p className="text-center text-sm text-[#1F4E79]/50 dark:text-gray-500 py-8">
-            No hay búsquedas creadas todavía.
+            {jobs.length === 0 ? "No hay búsquedas creadas todavía." : "Sin resultados para los filtros seleccionados."}
           </p>
         )}
-        {jobs.map((job) => (
+        {filtered.map((job) => (
           <div
             key={job.id}
             className="flex items-center justify-between rounded-xl border border-gray-100 bg-white p-4 dark:border-white/10 dark:bg-white/5"

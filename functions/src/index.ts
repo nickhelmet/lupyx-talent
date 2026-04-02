@@ -11,7 +11,7 @@ export { userProfile } from "./userProfile";
 export { getNotifications, markNotificationRead } from "./notifications";
 
 // Admin
-export { createJob, updateJob, updateJobStatus } from "./adminJobs";
+export { createJob, updateJob, updateJobStatus, adminListJobs } from "./adminJobs";
 export { adminListApplications, updateApplicationStatus, addInterviewNotes, manageInterviewRounds } from "./adminApplications";
 export { listUsers, updateUserRole, toggleUserStatus, adminDashboard } from "./adminUsers";
 export { fraudAnalysis } from "./fraudDetection";
