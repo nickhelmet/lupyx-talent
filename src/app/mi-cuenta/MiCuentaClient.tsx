@@ -32,12 +32,14 @@ export default function MiCuenta() {
   const [apps, setApps] = useState<Application[]>([]);
   const [appsLoading, setAppsLoading] = useState(true);
 
+  const [appsError, setAppsError] = useState<string | null>(null);
+
   useEffect(() => {
     if (!user || loading) return;
     let cancelled = false;
     fetchMyApplications()
       .then((data) => { if (!cancelled) setApps(data); })
-      .catch(() => {})
+      .catch((e) => { if (!cancelled) setAppsError(e instanceof Error ? e.message : "Error cargando postulaciones"); })
       .finally(() => { if (!cancelled) setAppsLoading(false); });
     return () => { cancelled = true; };
   }, [user, loading]);
@@ -93,11 +95,16 @@ export default function MiCuenta() {
             <FileText className="h-4 w-4 text-[#2EC4B6]" /> Mis postulaciones
           </h2>
 
+          {appsError && (
+            <div className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+              {appsError}
+            </div>
+          )}
           {appsLoading ? (
             <div className="mt-4 flex items-center gap-2 text-sm text-[#1F4E79]/50">
               <Loader2 className="h-4 w-4 animate-spin" /> Cargando...
             </div>
-          ) : apps.length === 0 ? (
+          ) : apps.length === 0 && !appsError ? (
             <p className="mt-4 text-sm text-[#1F4E79]/50 dark:text-gray-500">
               No te has postulado a ninguna búsqueda todavía.
             </p>
