@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import {
   LayoutDashboard,
   Briefcase,
@@ -39,9 +40,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-gradient-to-br from-[#0B1F3B] via-[#1F4E79] to-[#0B1F3B] px-4">
         <img src="/logo.webp" alt="Lupyx Talent" className="h-16 rounded-xl bg-white/10 p-1.5" />
         <p className="text-lg text-white">Necesitás iniciar sesión para acceder al panel admin</p>
-        <a href="/auth/signin?returnUrl=/admin" className="rounded-full bg-[#2EC4B6] px-8 py-3 font-semibold text-white hover:bg-[#26a89c]">
+        <Link href="/auth/signin?returnUrl=/admin" className="rounded-full bg-[#2EC4B6] px-8 py-3 font-semibold text-white hover:bg-[#26a89c]">
           Iniciar sesión
-        </a>
+        </Link>
       </div>
     );
   }
@@ -63,7 +64,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {sidebarLinks.map((link) => {
             const active = pathname === link.href;
             return (
-              <a
+              <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setSidebarOpen(false)}
@@ -75,7 +76,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               >
                 <link.icon className="h-4 w-4" />
                 {link.label}
-              </a>
+              </Link>
             );
           })}
         </nav>
