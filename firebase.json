@@ -57,6 +57,8 @@
       { "source": "/api/admin/allowlist", "function": "getAllowlist" },
       { "source": "/api/admin/allowlist/add", "function": "addAllowlistEmail" },
       { "source": "/api/admin/allowlist/remove", "function": "removeAllowlistEmail" },
+      { "source": "/api/admin/applications/comment", "function": "addComment" },
+      { "source": "/api/admin/applications/detail", "function": "getApplicationDetail" },
       { "source": "**", "destination": "/index.html" }
     ]
   },
