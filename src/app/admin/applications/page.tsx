@@ -64,6 +64,8 @@ export default function AdminApplications() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("");
+  const [filterJob, setFilterJob] = useState<string>("");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
   const [commentInternal, setCommentInternal] = useState(false);
@@ -132,7 +134,11 @@ export default function AdminApplications() {
     }
   }
 
+  const jobTitles = [...new Set(apps.map((a) => a.jobTitle).filter(Boolean))];
+
   const filtered = apps.filter((a) => {
+    if (filterStatus && a.status !== filterStatus) return false;
+    if (filterJob && a.jobTitle !== filterJob) return false;
     if (!search) return true;
     const q = search.toLowerCase();
     return (
@@ -164,6 +170,34 @@ export default function AdminApplications() {
           />
         </div>
         <span className="text-sm text-[#1F4E79]/60 dark:text-gray-400">{filtered.length} postulaciones</span>
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs outline-none focus:border-[#2EC4B6] dark:border-white/10 dark:bg-white/5 dark:text-white"
+        >
+          <option value="">Todos los estados</option>
+          {statusFlow.map((s) => (
+            <option key={s} value={s}>{statusLabels[s]}</option>
+          ))}
+        </select>
+        <select
+          value={filterJob}
+          onChange={(e) => setFilterJob(e.target.value)}
+          className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs outline-none focus:border-[#2EC4B6] dark:border-white/10 dark:bg-white/5 dark:text-white"
+        >
+          <option value="">Todas las búsquedas</option>
+          {jobTitles.map((j) => (
+            <option key={j} value={j}>{j}</option>
+          ))}
+        </select>
+        {(filterStatus || filterJob) && (
+          <button onClick={() => { setFilterStatus(""); setFilterJob(""); }} className="text-xs text-[#2EC4B6] hover:underline">
+            Limpiar filtros
+          </button>
+        )}
       </div>
 
       {error && (
