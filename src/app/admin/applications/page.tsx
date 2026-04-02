@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Search, Loader2, MessageSquare, ChevronDown, ChevronUp, Send, Sparkles, Download } from "lucide-react";
 import { adminFetch } from "@/services/adminApi";
 import Pagination from "@/components/Pagination";
+import { timeAgo } from "@/lib/utils";
 import { SkeletonList } from "@/components/Skeleton";
 import type { Application, ApplicationStatus } from "@/types";
 
@@ -262,6 +263,7 @@ export default function AdminApplications() {
                 </div>
                 <p className="mt-0.5 text-sm text-[#1F4E79]/60 dark:text-gray-400">
                   {app.email} · {app.jobTitle}
+                  {app.appliedAt && <span className="text-[#1F4E79]/40 dark:text-gray-600"> · {timeAgo(app.appliedAt as string)}</span>}
                 </p>
               </div>
               <select
