@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/hooks/useAuth";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import CookieConsent from "@/components/CookieConsent";
+import WhatsAppButton from "@/components/WhatsAppButton";
+import { ToastProvider } from "@/components/Toast";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -112,10 +114,13 @@ export default function RootLayout({
         </a>
         <ThemeScript />
         <ErrorBoundary>
-          <AuthProvider>
-            {children}
-            <CookieConsent />
-          </AuthProvider>
+          <ToastProvider>
+            <AuthProvider>
+              {children}
+              <WhatsAppButton />
+              <CookieConsent />
+            </AuthProvider>
+          </ToastProvider>
         </ErrorBoundary>
       </body>
     </html>
