@@ -17,6 +17,7 @@ export { listUsers, updateUserRole, toggleUserStatus, adminDashboard } from "./a
 export { fraudAnalysis } from "./fraudDetection";
 export { getAllowlist, addAllowlistEmail, removeAllowlistEmail } from "./adminAllowlist";
 export { addComment, getApplicationDetail } from "./adminComments";
+export { analyzeCv } from "./cvAnalysis";
 
 // SEO
 export { sitemap } from "./sitemap";

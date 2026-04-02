@@ -59,6 +59,7 @@
       { "source": "/api/admin/allowlist/remove", "function": "removeAllowlistEmail" },
       { "source": "/api/admin/applications/comment", "function": "addComment" },
       { "source": "/api/admin/applications/detail", "function": "getApplicationDetail" },
+      { "source": "/api/admin/applications/analyze-cv", "function": "analyzeCv" },
       { "source": "**", "destination": "/index.html" }
     ]
   },
