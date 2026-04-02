@@ -5,6 +5,7 @@ import { Briefcase, FileText, Users, Clock, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { SkeletonGrid, SkeletonList } from "@/components/Skeleton";
 import { adminFetch } from "@/services/adminApi";
+import { useAuth } from "@/hooks/useAuth";
 import type { Application } from "@/types";
 
 interface DashboardStats {
@@ -33,11 +34,13 @@ const statusColors: Record<string, string> = {
 };
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentApps, setRecentApps] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) return;
     let cancelled = false;
     const timer = setTimeout(async () => {
       try {
@@ -56,7 +59,7 @@ export default function AdminDashboard() {
       }
     }, 500);
     return () => { cancelled = true; clearTimeout(timer); };
-  }, []);
+  }, [user]);
 
   // Status distribution
   const statusDist: Record<string, number> = {};
