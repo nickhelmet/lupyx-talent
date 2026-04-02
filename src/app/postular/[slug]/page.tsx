@@ -1,3 +1,4 @@
+import PublicLayout from "@/components/PublicLayout";
 import PostularClient from "./PostularClient";
 
 export function generateStaticParams() {
@@ -8,5 +9,9 @@ export function generateStaticParams() {
 }
 
 export default function PostularPage() {
-  return <PostularClient />;
+  return (
+    <PublicLayout>
+      <PostularClient />
+    </PublicLayout>
+  );
 }
