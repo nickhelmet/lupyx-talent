@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Pause, Play, Plus, Loader2 } from "lucide-react";
+import { Pause, Play, Plus, Edit, Loader2, Users } from "lucide-react";
+import Link from "next/link";
 import { adminFetch } from "@/services/adminApi";
-import type { Job } from "@/types";
+import type { Job, Application } from "@/types";
 
 const statusStyles: Record<string, string> = {
   ACTIVE: "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400",
@@ -13,6 +14,7 @@ const statusStyles: Record<string, string> = {
 
 export default function AdminJobs() {
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [appCounts, setAppCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -20,8 +22,17 @@ export default function AdminJobs() {
   async function loadJobs() {
     try {
       setError(null);
-      const data = await adminFetch("listJobs");
-      setJobs(data);
+      const [jobsData, appsData] = await Promise.all([
+        adminFetch("listJobs"),
+        adminFetch("adminListApplications").catch(() => []),
+      ]);
+      setJobs(jobsData);
+      const counts: Record<string, number> = {};
+      (appsData as Application[]).forEach((a) => {
+        const key = a.jobTitle || "";
+        counts[key] = (counts[key] || 0) + 1;
+      });
+      setAppCounts(counts);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error loading jobs");
     } finally {
@@ -62,12 +73,12 @@ export default function AdminJobs() {
     <div>
       <div className="flex items-center justify-between">
         <p className="text-sm text-[#1F4E79]/60 dark:text-gray-400">{jobs.length} búsquedas</p>
-        <a
+        <Link
           href="/admin/jobs/new"
           className="flex items-center gap-2 rounded-full bg-[#2EC4B6] px-5 py-2 text-sm font-semibold text-white hover:bg-[#26a89c]"
         >
           <Plus className="h-4 w-4" /> Nueva búsqueda
-        </a>
+        </Link>
       </div>
 
       {error && (
@@ -88,15 +99,29 @@ export default function AdminJobs() {
             className="flex items-center justify-between rounded-xl border border-gray-100 bg-white p-4 dark:border-white/10 dark:bg-white/5"
           >
             <div>
-              <h3 className="font-semibold text-[#0B1F3B] dark:text-white">{job.title}</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-[#0B1F3B] dark:text-white">{job.title}</h3>
+                {appCounts[job.title] > 0 && (
+                  <span className="flex items-center gap-1 rounded-full bg-[#4FA3D1]/10 px-2 py-0.5 text-xs font-semibold text-[#4FA3D1]">
+                    <Users className="h-3 w-3" /> {appCounts[job.title]}
+                  </span>
+                )}
+              </div>
               <p className="mt-0.5 text-sm text-[#1F4E79]/60 dark:text-gray-400">
                 {job.company} · {job.location} · {job.postedDate?.split("T")[0]}
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusStyles[job.status] || ""}`}>
                 {job.status}
               </span>
+              <Link
+                href={`/admin/jobs/${job.slug || job.id}`}
+                className="text-[#1F4E79]/40 hover:text-[#2EC4B6] dark:text-gray-500"
+                aria-label="Editar"
+              >
+                <Edit className="h-4 w-4" />
+              </Link>
               <button
                 onClick={() => toggleStatus(job.slug || job.id, job.status)}
                 disabled={actionLoading === (job.slug || job.id)}
