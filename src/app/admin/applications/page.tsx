@@ -25,6 +25,15 @@ const statusLabels: Record<string, string> = {
 
 const statusFlow: ApplicationStatus[] = ["PENDING", "REVIEWING", "INTERVIEW", "ACCEPTED", "REJECTED", "HIRED"];
 
+const statusColors: Record<string, string> = {
+  PENDING: "bg-amber-500",
+  REVIEWING: "bg-blue-500",
+  INTERVIEW: "bg-purple-500",
+  ACCEPTED: "bg-emerald-500",
+  REJECTED: "bg-red-500",
+  HIRED: "bg-[#2EC4B6]",
+};
+
 const educationLabels: Record<string, string> = {
   PRIMARY: "Primario",
   SECONDARY: "Secundario",
@@ -42,6 +51,13 @@ interface Comment {
   createdAt: string;
 }
 
+interface StatusEvent {
+  from: string;
+  to: string;
+  changedBy: string;
+  changedAt: string;
+}
+
 interface CvAnalysis {
   is_cv: boolean;
   summary?: string;
@@ -57,6 +73,7 @@ type AppWithComments = Application & {
   comments?: Comment[];
   cvAnalysis?: CvAnalysis;
   cvAnalyzedAt?: string;
+  statusHistory?: StatusEvent[];
 };
 
 export default function AdminApplications() {
@@ -261,6 +278,25 @@ export default function AdminApplications() {
                     <span className="text-[#0B1F3B] dark:text-white">{educationLabels[app.educationLevel || ""] || app.educationLevel || "—"}</span>
                   </div>
                 </div>
+
+                {/* Status timeline */}
+                {app.statusHistory && app.statusHistory.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold text-[#1F4E79]/50 dark:text-gray-500">Historial</p>
+                    <div className="mt-2 space-y-2">
+                      {app.statusHistory.map((evt, i) => (
+                        <div key={i} className="flex items-center gap-2 text-xs text-[#1F4E79]/60 dark:text-gray-500">
+                          <div className={`h-2 w-2 rounded-full ${statusColors[evt.to] || "bg-gray-400"}`} />
+                          <span>{statusLabels[evt.from] || evt.from} → <strong className="text-[#0B1F3B] dark:text-white">{statusLabels[evt.to] || evt.to}</strong></span>
+                          <span className="text-[#1F4E79]/40">·</span>
+                          <span>{evt.changedBy?.split("@")[0]}</span>
+                          <span className="text-[#1F4E79]/40">·</span>
+                          <span>{new Date(evt.changedAt).toLocaleDateString("es-AR")}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* CV download */}
                 {app.cvPath && (

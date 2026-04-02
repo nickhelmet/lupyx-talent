@@ -40,9 +40,17 @@ export const updateApplicationStatus = onRequest({ maxInstances: 1 }, async (req
 
   const db = getFirestore();
   const appDoc = await db.doc(`applications/${applicationId}`).get();
+  const previousStatus = appDoc.data()?.status || "UNKNOWN";
+
   await db.doc(`applications/${applicationId}`).update({
     status,
     updatedAt: FieldValue.serverTimestamp(),
+    statusHistory: FieldValue.arrayUnion({
+      from: previousStatus,
+      to: status,
+      changedBy: user.email,
+      changedAt: new Date().toISOString(),
+    }),
   });
 
   // Email candidate about status change
