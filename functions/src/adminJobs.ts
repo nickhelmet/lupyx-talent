@@ -31,7 +31,15 @@ export const createJob = onRequest({ maxInstances: 1 }, async (req, res) => {
   const tags = Array.isArray(raw.tags) ? raw.tags.filter((t: unknown) => typeof t === "string").map((t: string) => sanitizeString(t).slice(0, 50)).slice(0, 20) : [];
 
   const db = getFirestore();
-  const slug = typeof raw.slug === "string" ? raw.slug.replace(/[^a-z0-9-]/g, "").slice(0, 100) : title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const baseSlug = typeof raw.slug === "string" ? raw.slug.replace(/[^a-z0-9-]/g, "").slice(0, 100) : title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+  // Ensure unique slug
+  let slug = baseSlug;
+  const existing = await db.doc(`jobs/${slug}`).get();
+  if (existing.exists) {
+    const suffix = Date.now().toString(36).slice(-4);
+    slug = `${baseSlug}-${suffix}`;
+  }
 
   const job = {
     title, company, description, requirements,
