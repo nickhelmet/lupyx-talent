@@ -16,7 +16,7 @@ const navLinks = [
 ];
 
 export default function Header() {
-  const { user, loginWithGoogle } = useAuth();
+  const { user, loading: authLoading, loginWithGoogle } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -67,7 +67,9 @@ export default function Header() {
               )
             )}
             <ThemeToggle />
-            {user ? (
+            {authLoading ? (
+              <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200 dark:bg-white/10" />
+            ) : user ? (
               <UserMenu />
             ) : (
               <button
