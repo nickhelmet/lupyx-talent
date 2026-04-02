@@ -35,7 +35,8 @@ export default function CookieConsent() {
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-4 sm:flex-row sm:justify-between">
         <p className="text-sm text-[#1F4E79]/80 dark:text-gray-300">
           Usamos cookies para mejorar tu experiencia y analizar el tráfico del sitio.
-          Al continuar navegando, aceptás su uso.
+          Al continuar navegando, aceptás su uso.{" "}
+          <a href="/privacidad" className="text-[#2EC4B6] underline">Política de Privacidad</a>
         </p>
         <button
           onClick={accept}

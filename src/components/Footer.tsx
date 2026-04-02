@@ -51,10 +51,16 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-gray-100 pt-6 text-center dark:border-white/10">
-          <p className="text-xs text-[#1F4E79]/40 dark:text-gray-600">
-            © {new Date().getFullYear()} Lupyx Talent. Todos los derechos reservados.
-          </p>
+        <div className="mt-10 border-t border-gray-100 pt-6 dark:border-white/10">
+          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <p className="text-xs text-[#1F4E79]/40 dark:text-gray-600">
+              © {new Date().getFullYear()} Lupyx Talent. Todos los derechos reservados.
+            </p>
+            <div className="flex gap-4">
+              <Link href="/terminos" className="text-xs text-[#1F4E79]/40 hover:text-[#2EC4B6] dark:text-gray-600">Términos</Link>
+              <Link href="/privacidad" className="text-xs text-[#1F4E79]/40 hover:text-[#2EC4B6] dark:text-gray-600">Privacidad</Link>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
