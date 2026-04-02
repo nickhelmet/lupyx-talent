@@ -1173,6 +1173,22 @@ export const analyzeDoc = onRequest(
 `src/components/ErrorBoundary.tsx` wrapping el layout.
 Muestra mensaje branded + botón reload en caso de crash.
 
+### Signed URLs para descargas seguras
+Para archivos en Storage con rules deny-all, usar Cloud Functions que generen signed URLs:
+```typescript
+const [url] = await bucket.file(path).getSignedUrl({
+  action: "read",
+  expires: Date.now() + 15 * 60 * 1000, // 15 min
+});
+res.json({ url });
+```
+El frontend llama a la función, recibe la URL temporal, y abre en nueva tab.
+
+### Admin panel patterns
+- **Filtros:** estado, búsqueda, fecha. Mantener en client-side con `.filter()` para listas pequeñas (<1000 items). Para listas grandes, filtrar en Cloud Function con Firestore queries.
+- **Enum labels:** mapear enums de Firestore (`UNIVERSITY`) a labels legibles (`Universitario`) con objetos de traducción en el frontend.
+- **Navegación:** usar `next/link` o `router.push` en SPA. Nunca `<a href>` que causa full page reload y pierde auth state.
+
 ---
 
 *Última actualización: Abril 2026 — basada en implementación de Lupyx Talent*
