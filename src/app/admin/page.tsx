@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Briefcase, FileText, Users, Clock, Loader2, TrendingUp } from "lucide-react";
+import { Briefcase, FileText, Users, Clock, TrendingUp } from "lucide-react";
 import Link from "next/link";
+import { SkeletonGrid, SkeletonList } from "@/components/Skeleton";
 import { adminFetch } from "@/services/adminApi";
 import type { Application } from "@/types";
 
@@ -73,8 +74,12 @@ export default function AdminDashboard() {
   return (
     <div>
       {loading && (
-        <div className="mb-4 flex items-center gap-2 text-sm text-[#1F4E79]/50 dark:text-gray-500">
-          <Loader2 className="h-4 w-4 animate-spin" /> Cargando datos...
+        <div className="space-y-8">
+          <SkeletonGrid />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <SkeletonList count={4} />
+            <SkeletonList count={4} />
+          </div>
         </div>
       )}
 
