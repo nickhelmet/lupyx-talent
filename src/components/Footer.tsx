@@ -27,7 +27,6 @@ export default function Footer() {
             <ul className="mt-3 space-y-2">
               <li><Link href="/busquedas" className="text-sm text-[#1F4E79]/70 hover:text-[#2EC4B6] dark:text-gray-400">Búsquedas activas</Link></li>
               <li><Link href="/mi-cuenta" className="text-sm text-[#1F4E79]/70 hover:text-[#2EC4B6] dark:text-gray-400">Mi cuenta</Link></li>
-              <li><Link href="/nosotros" className="text-sm text-[#1F4E79]/70 hover:text-[#2EC4B6] dark:text-gray-400">Quiénes somos</Link></li>
             </ul>
           </div>
 

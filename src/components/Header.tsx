@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 import UserMenu from "./UserMenu";
 import { useAuth } from "@/hooks/useAuth";
@@ -36,13 +37,13 @@ export default function Header() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between sm:h-20">
           {/* Logo */}
-          <a href="#inicio" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <img
               src="/logo.jpg"
               alt="Lupyx Talent"
-              className="h-10 w-auto sm:h-12"
+              className="h-10 w-auto sm:h-14"
             />
-          </a>
+          </Link>
 
           {/* Desktop Nav */}
           <nav className="hidden items-center gap-8 md:flex">
