@@ -16,6 +16,7 @@ export { adminListApplications, updateApplicationStatus, addInterviewNotes, mana
 export { listUsers, updateUserRole, toggleUserStatus, adminDashboard } from "./adminUsers";
 export { fraudAnalysis } from "./fraudDetection";
 export { getAllowlist, addAllowlistEmail, removeAllowlistEmail } from "./adminAllowlist";
+export { addComment, getApplicationDetail } from "./adminComments";
 
 // SEO
 export { sitemap } from "./sitemap";
