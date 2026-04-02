@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Search, Loader2, MessageSquare, ChevronDown, ChevronUp, Send, Sparkles, Download } from "lucide-react";
 import { adminFetch } from "@/services/adminApi";
+import Pagination from "@/components/Pagination";
+import { SkeletonList } from "@/components/Skeleton";
 import type { Application, ApplicationStatus } from "@/types";
 
 const statusStyles: Record<string, string> = {
@@ -88,6 +90,8 @@ export default function AdminApplications() {
   const [commentInternal, setCommentInternal] = useState(false);
   const [sending, setSending] = useState(false);
   const [analyzing, setAnalyzing] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const perPage = 10;
 
   async function loadApps() {
     try {
@@ -166,12 +170,10 @@ export default function AdminApplications() {
     );
   });
 
+  const paginated = filtered.slice((page - 1) * perPage, page * perPage);
+
   if (loading) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-[#1F4E79]/50 dark:text-gray-500">
-        <Loader2 className="h-4 w-4 animate-spin" /> Cargando postulaciones...
-      </div>
-    );
+    return <SkeletonList count={5} />;
   }
 
   return (
@@ -227,7 +229,7 @@ export default function AdminApplications() {
             {apps.length === 0 ? "No hay postulaciones todavía." : "Sin resultados."}
           </p>
         )}
-        {filtered.map((app) => (
+        {paginated.map((app) => (
           <div key={app.id} className="rounded-xl border border-gray-100 bg-white dark:border-white/10 dark:bg-white/5">
             {/* Header */}
             <div
@@ -476,6 +478,8 @@ export default function AdminApplications() {
           </div>
         ))}
       </div>
+
+      <Pagination total={filtered.length} page={page} perPage={perPage} onPageChange={setPage} />
     </div>
   );
 }
