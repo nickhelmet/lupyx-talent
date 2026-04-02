@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import ApplicationProgress from "@/components/ApplicationProgress";
 import { LogOut, FileText, Loader2 } from "lucide-react";
 import { fetchMyApplications } from "@/services/api";
 import type { Application } from "@/types";
@@ -112,6 +113,9 @@ export default function MiCuenta() {
                     <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${statusColors[app.status] || "bg-gray-100 text-gray-500"}`}>
                       {statusLabels[app.status] || app.status}
                     </span>
+                  </div>
+                  <div className="mt-4">
+                    <ApplicationProgress status={app.status} />
                   </div>
                   <div className="mt-3 flex gap-4 text-xs text-[#1F4E79]/50 dark:text-gray-500">
                     {app.appliedAt && (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, MapPin, Briefcase, ExternalLink, Share2, Clock, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -49,6 +50,7 @@ export default function JobDetailClient() {
   const router = useRouter();
   const { user, loginWithGoogle } = useAuth();
   const [job, setJob] = useState<Job | null>(null);
+  const [related, setRelated] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -58,6 +60,7 @@ export default function JobDetailClient() {
         if (found) {
           setJob(found);
           track.jobView(found.id, found.title);
+          setRelated(jobs.filter((j) => j.id !== found.id).slice(0, 2));
         }
       })
       .catch(() => {})
@@ -176,6 +179,32 @@ export default function JobDetailClient() {
             <ShareButtons job={job} />
           </div>
         </motion.div>
+
+        {/* Related jobs */}
+        {related.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-lg font-bold text-[#0B1F3B] dark:text-white">Otras búsquedas que podrían interesarte</h2>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {related.map((r) => (
+                <Link
+                  key={r.id}
+                  href={`/busquedas/${r.slug || r.id}`}
+                  className="rounded-xl border border-gray-100 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5"
+                >
+                  <h3 className="font-semibold text-[#0B1F3B] dark:text-white">{r.title}</h3>
+                  <p className="mt-1 text-sm text-[#1F4E79]/60 dark:text-gray-400">{r.company} · {r.location}</p>
+                  {r.tags && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {r.tags.slice(0, 3).map((t) => (
+                        <span key={t} className="rounded-full bg-[#0B1F3B]/5 px-2 py-0.5 text-[10px] font-medium text-[#1F4E79] dark:bg-white/10 dark:text-gray-300">{t}</span>
+                      ))}
+                    </div>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
