@@ -42,6 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => { cancelled = true; clearTimeout(timer); };
   }, [user, loading, pathname]);
 
+  // Show spinner while auth resolves (loading=true means onAuthStateChanged hasn't fired yet)
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#0B1F3B]">
