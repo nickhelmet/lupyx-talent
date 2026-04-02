@@ -59,7 +59,7 @@ export default function Hero() {
               <img
                 src="/logo.jpg"
                 alt="Lupyx Talent"
-                className="mx-auto h-20 w-auto rounded-xl bg-white/10 p-2 backdrop-blur-sm sm:h-28"
+                className="mx-auto h-28 w-auto rounded-2xl bg-white/10 p-3 backdrop-blur-sm sm:h-40 lg:h-48"
               />
             </picture>
           </motion.div>
