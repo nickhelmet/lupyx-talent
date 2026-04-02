@@ -47,15 +47,25 @@ export default function Header() {
 
           {/* Desktop Nav */}
           <nav className="hidden items-center gap-8 md:flex">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-sm font-medium text-[#1F4E79] transition-colors hover:text-[#2EC4B6] dark:text-gray-300"
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) =>
+              link.href.startsWith("#") || link.href.includes("#") ? (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm font-medium text-[#1F4E79] transition-colors hover:text-[#2EC4B6] dark:text-gray-300"
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm font-medium text-[#1F4E79] transition-colors hover:text-[#2EC4B6] dark:text-gray-300"
+                >
+                  {link.label}
+                </Link>
+              )
+            )}
             <ThemeToggle />
             {user ? (
               <UserMenu />
@@ -93,23 +103,20 @@ export default function Header() {
             className="overflow-hidden bg-white/95 backdrop-blur-md dark:bg-[#0a0f1a]/95 md:hidden"
           >
             <nav className="flex flex-col gap-4 px-6 py-6">
-              {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-base font-medium text-[#1F4E79] transition-colors hover:text-[#2EC4B6]"
-                >
-                  {link.label}
-                </a>
-              ))}
-              <a
-                href="#busquedas"
+              {navLinks.map((link) =>
+                link.href.startsWith("#") || link.href.includes("#") ? (
+                  <a key={link.href} href={link.href} onClick={() => setIsMobileMenuOpen(false)} className="text-base font-medium text-[#1F4E79] transition-colors hover:text-[#2EC4B6] dark:text-gray-300">{link.label}</a>
+                ) : (
+                  <Link key={link.href} href={link.href} onClick={() => setIsMobileMenuOpen(false)} className="text-base font-medium text-[#1F4E79] transition-colors hover:text-[#2EC4B6] dark:text-gray-300">{link.label}</Link>
+                )
+              )}
+              <Link
+                href="/busquedas"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="mt-2 rounded-full bg-[#2EC4B6] px-5 py-2.5 text-center text-sm font-semibold text-white transition-all hover:bg-[#26a89c]"
               >
                 Ver búsquedas
-              </a>
+              </Link>
             </nav>
           </motion.div>
         )}

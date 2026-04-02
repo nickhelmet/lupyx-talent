@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { fetchJobs } from "@/services/api";
 import { track } from "@/lib/analytics";
@@ -141,9 +142,9 @@ export default function ActiveSearches() {
                 </span>
               </div>
 
-              <a href={`/busquedas/${job.id}`} className="text-xl font-bold text-[#0B1F3B] transition-colors hover:text-[#2EC4B6] dark:text-white sm:text-2xl">
+              <Link href={`/busquedas/${job.id}`} className="text-xl font-bold text-[#0B1F3B] transition-colors hover:text-[#2EC4B6] dark:text-white sm:text-2xl">
                 {job.title}
-              </a>
+              </Link>
               <p className="mt-1 text-sm font-medium text-[#1F4E79]/70 dark:text-gray-400">
                 {job.company}
               </p>
