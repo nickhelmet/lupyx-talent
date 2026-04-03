@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import ApplicationProgress from "@/components/ApplicationProgress";
-import { LogOut, FileText, Loader2 } from "lucide-react";
+import { FileText, Loader2 } from "lucide-react";
 import { fetchMyApplications } from "@/services/api";
 import type { Application } from "@/types";
 
@@ -27,7 +27,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function MiCuenta() {
-  const { user, loading, logout, loginWithGoogle } = useAuth();
+  const { user, loading, loginWithGoogle } = useAuth();
   const router = useRouter();
   const [apps, setApps] = useState<Application[]>([]);
   const [appsLoading, setAppsLoading] = useState(true);
@@ -145,12 +145,6 @@ export default function MiCuenta() {
             </div>
           )}
 
-          <button
-            onClick={logout}
-            className="mt-8 flex items-center gap-2 text-sm text-red-500 hover:text-red-600"
-          >
-            <LogOut className="h-4 w-4" /> Cerrar sesión
-          </button>
         </div>
       </div>
     </div>
