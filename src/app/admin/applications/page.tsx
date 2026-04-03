@@ -67,9 +67,11 @@ interface CvAnalysis {
   skills?: string[];
   experience?: Array<{ company: string; position: string; period: string }>;
   education?: Array<{ institution: string; degree: string; year: string }>;
-  languages?: string[];
+  languages?: Array<string | { language: string; level: string; certifications?: string }>;
   seniority_level?: string;
   total_years_experience?: number;
+  job_match?: { score: number; meets?: string[]; missing?: string[]; notes?: string };
+  better_fit_jobs?: Array<{ job_title: string; reason: string }>;
 }
 
 type AppWithComments = Application & {
@@ -495,9 +497,57 @@ export default function AdminApplications() {
                         </div>
                       )}
                       {app.cvAnalysis.languages && app.cvAnalysis.languages.length > 0 && (
-                        <p className="text-xs text-[#1F4E79]/70 dark:text-gray-400">
-                          Idiomas: {app.cvAnalysis.languages.join(", ")}
-                        </p>
+                        <div>
+                          <p className="text-xs text-[#1F4E79]/50">Idiomas</p>
+                          <div className="mt-1 space-y-0.5">
+                            {app.cvAnalysis.languages.map((lang: string | { language: string; level: string; certifications?: string }, i: number) => (
+                              <p key={i} className="text-sm text-[#0B1F3B] dark:text-gray-200">
+                                {typeof lang === "string" ? lang : (
+                                  <><strong>{lang.language}</strong> — {lang.level}{lang.certifications ? ` (${lang.certifications})` : ""}</>
+                                )}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {app.cvAnalysis.job_match && (
+                        <div className="rounded-lg border border-[#2EC4B6]/20 bg-white p-3 dark:bg-white/5">
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs font-semibold text-[#1F4E79]/50">Match con la búsqueda</p>
+                            <span className={`rounded-full px-3 py-0.5 text-sm font-bold ${
+                              app.cvAnalysis.job_match.score >= 75 ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400" :
+                              app.cvAnalysis.job_match.score >= 50 ? "bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400" :
+                              "bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400"
+                            }`}>{app.cvAnalysis.job_match.score}%</span>
+                          </div>
+                          {app.cvAnalysis.job_match.meets && app.cvAnalysis.job_match.meets.length > 0 && (
+                            <div className="mt-2">
+                              <p className="text-[10px] font-semibold text-emerald-600">Cumple:</p>
+                              {app.cvAnalysis.job_match.meets.map((m: string, i: number) => (
+                                <p key={i} className="text-xs text-[#1F4E79]/70 dark:text-gray-400">✓ {m}</p>
+                              ))}
+                            </div>
+                          )}
+                          {app.cvAnalysis.job_match.missing && app.cvAnalysis.job_match.missing.length > 0 && (
+                            <div className="mt-1">
+                              <p className="text-[10px] font-semibold text-red-500">No cumple:</p>
+                              {app.cvAnalysis.job_match.missing.map((m: string, i: number) => (
+                                <p key={i} className="text-xs text-[#1F4E79]/70 dark:text-gray-400">✗ {m}</p>
+                              ))}
+                            </div>
+                          )}
+                          {app.cvAnalysis.job_match.notes && (
+                            <p className="mt-1 text-xs italic text-[#1F4E79]/50 dark:text-gray-500">{app.cvAnalysis.job_match.notes}</p>
+                          )}
+                        </div>
+                      )}
+                      {app.cvAnalysis.better_fit_jobs && app.cvAnalysis.better_fit_jobs.length > 0 && (
+                        <div>
+                          <p className="text-xs text-[#1F4E79]/50">Podría encajar mejor en:</p>
+                          {app.cvAnalysis.better_fit_jobs.map((j: { job_title: string; reason: string }, i: number) => (
+                            <p key={i} className="text-xs text-[#1F4E79]/70 dark:text-gray-400">→ <strong>{j.job_title}</strong>: {j.reason}</p>
+                          ))}
+                        </div>
                       )}
                     </div>
                   ) : app.cvPath ? (
