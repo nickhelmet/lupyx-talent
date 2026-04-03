@@ -204,7 +204,7 @@ export default function MiCuentaClient() {
                   <div key={app.id} className="rounded-xl border border-gray-100 p-4 dark:border-white/10">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="font-medium text-[#0B1F3B] dark:text-white">{app.jobTitle}</p>
+                        <a href={`/busquedas/${app.jobId}/`} className="font-medium text-[#0B1F3B] hover:text-[#2EC4B6] dark:text-white">{app.jobTitle}</a>
                         <p className="text-sm text-[#1F4E79]/60 dark:text-gray-400">{app.jobCompany}</p>
                       </div>
                       <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${statusColors[app.status] || "bg-gray-100 text-gray-500"}`}>

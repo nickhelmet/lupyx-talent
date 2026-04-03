@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Pause, Play, Plus, Edit, Loader2, Users } from "lucide-react";
+import { Pause, Play, Plus, Edit, Loader2, Users, XCircle } from "lucide-react";
 import Link from "next/link";
 import { adminFetch } from "@/services/adminApi";
 import type { Job, Application } from "@/types";
@@ -163,6 +163,29 @@ export default function AdminJobs() {
                   <Play className="h-4 w-4" />
                 )}
               </button>
+              {job.status !== "CLOSED" && (
+                <button
+                  onClick={async () => {
+                    if (!confirm(`¿Cerrar la búsqueda "${job.title}"? No se eliminará, quedará archivada.`)) return;
+                    setActionLoading(job.slug || job.id);
+                    try {
+                      await adminFetch("updateJobStatus", {
+                        method: "POST",
+                        body: JSON.stringify({ jobId: job.slug || job.id, status: "CLOSED" }),
+                      });
+                      await loadJobs();
+                    } catch (e) {
+                      setError(e instanceof Error ? e.message : "Error");
+                    } finally {
+                      setActionLoading(null);
+                    }
+                  }}
+                  className="text-[#1F4E79]/40 hover:text-red-500 dark:text-gray-500"
+                  aria-label="Cerrar búsqueda"
+                >
+                  <XCircle className="h-4 w-4" />
+                </button>
+              )}
             </div>
           </div>
         ))}

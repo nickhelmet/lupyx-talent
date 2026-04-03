@@ -1149,6 +1149,27 @@ Mostrar barra de progreso para nuevos usuarios:
 2. Componente con checkmarks + progress bar
 3. Links directos a cada paso pendiente
 
+### Typewriter effect en Hero
+Componente que escribe y borra roles rotativos ("Backend Engineers", "Designers", "PMs").
+Usa `useState` + `setTimeout` con velocidad de escritura (80ms) y borrado (30ms).
+Pausa de 2s entre roles. Ideal para landing pages dinámicas.
+
+### Polling para actualizaciones en tiempo real
+Para mostrar badges de notificación sin websockets:
+```typescript
+useEffect(() => {
+  const interval = setInterval(() => fetchCount(), 30000); // 30s
+  return () => clearInterval(interval);
+}, []);
+```
+Bajo costo: 1 read de Firestore cada 30s. Para tiempo real verdadero, usar Firestore `onSnapshot`.
+
+### Gemini: CEFR language scale + job match
+Al analizar documentos con Gemini, enviar contexto adicional:
+- Descripción del job al que aplica → match score 0-100%
+- Lista de otros jobs activos → sugerir mejor encaje
+- Escala CEFR (A1-C2) para idiomas en vez de "básico/avanzado"
+
 ### Admin CRUD
 Forms completos para crear/editar items principales.
 Conectar a Cloud Functions con App Check + Auth token.

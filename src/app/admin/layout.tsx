@@ -31,15 +31,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     if (!user || loading) return;
     let cancelled = false;
-    const timer = setTimeout(() => {
+
+    function fetchCount() {
       adminFetch("adminDashboard")
         .then((data: { pendingApplications?: number }) => {
           if (!cancelled) setPendingCount(data.pendingApplications || 0);
         })
         .catch(() => {});
-    }, 800);
-    return () => { cancelled = true; clearTimeout(timer); };
-  }, [user, loading, pathname]);
+    }
+
+    const timer = setTimeout(fetchCount, 800);
+    const interval = setInterval(fetchCount, 30000); // Poll every 30s
+    return () => { cancelled = true; clearTimeout(timer); clearInterval(interval); };
+  }, [user, loading]);
 
   if (loading) {
     return (

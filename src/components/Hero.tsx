@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
 import Link from "next/link";
+import TypeWriter from "./TypeWriter";
 
 export default function Hero() {
   return (
@@ -74,12 +75,9 @@ export default function Hero() {
           </motion.div>
 
           <h1 className="text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-            Conectando{" "}
-            <span className="bg-gradient-to-r from-[#2EC4B6] to-[#4FA3D1] bg-clip-text text-transparent">
-              talento
-            </span>
+            Buscamos
             <br />
-            con oportunidades
+            <TypeWriter />
           </h1>
 
           <motion.p
