@@ -195,17 +195,30 @@ export default function AdminApplications() {
         <span className="text-sm text-[#1F4E79]/60 dark:text-gray-400">{filtered.length} postulaciones</span>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs outline-none focus:border-[#2EC4B6] dark:border-white/10 dark:bg-white/5 dark:text-white"
+      {/* Status quick filters */}
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        <button
+          onClick={() => setFilterStatus("")}
+          className={`cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors ${!filterStatus ? "bg-[#2EC4B6] text-white" : "bg-gray-100 text-[#1F4E79]/60 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-400"}`}
         >
-          <option value="">Todos los estados</option>
-          {statusFlow.map((s) => (
-            <option key={s} value={s}>{statusLabels[s]}</option>
-          ))}
-        </select>
+          Todos ({apps.length})
+        </button>
+        {statusFlow.map((s) => {
+          const count = apps.filter((a) => a.status === s).length;
+          if (count === 0) return null;
+          return (
+            <button
+              key={s}
+              onClick={() => setFilterStatus(filterStatus === s ? "" : s)}
+              className={`cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors ${filterStatus === s ? "bg-[#2EC4B6] text-white" : "bg-gray-100 text-[#1F4E79]/60 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-400"}`}
+            >
+              {statusLabels[s]} ({count})
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-2 flex flex-wrap gap-2">
         <select
           value={filterJob}
           onChange={(e) => setFilterJob(e.target.value)}
@@ -264,7 +277,11 @@ export default function AdminApplications() {
                   {expanded === app.id ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
                 </div>
                 <p className="mt-0.5 text-sm text-[#1F4E79]/60 dark:text-gray-400">
-                  {app.email} · {app.jobTitle}
+                  <span
+                    onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(app.email); }}
+                    className="cursor-pointer hover:text-[#2EC4B6]"
+                    title="Click para copiar email"
+                  >{app.email}</span> · {app.jobTitle}
                   {app.appliedAt && <span className="text-[#1F4E79]/40 dark:text-gray-600"> · {timeAgo(app.appliedAt as string)}</span>}
                 </p>
               </div>

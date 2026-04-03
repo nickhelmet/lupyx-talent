@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Users, Target, Globe, Sparkles } from "lucide-react";
+import CountUp from "./CountUp";
 
 const highlights = [
   {
@@ -73,16 +74,16 @@ export default function AboutUs() {
             </p>
             <div className="mt-6 flex gap-8">
               <div>
-                <p className="text-2xl font-bold text-[#2EC4B6]">IT & General</p>
-                <p className="text-xs text-[#1F4E79]/70 dark:text-gray-400">Perfiles</p>
+                <p className="text-2xl font-bold text-[#2EC4B6]">+<CountUp end={50} /></p>
+                <p className="text-xs text-[#1F4E79]/70 dark:text-gray-400">Procesos gestionados</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-[#2EC4B6]">LATAM</p>
-                <p className="text-xs text-[#1F4E79]/70 dark:text-gray-400">Alcance</p>
+                <p className="text-2xl font-bold text-[#2EC4B6]">+<CountUp end={200} /></p>
+                <p className="text-xs text-[#1F4E79]/70 dark:text-gray-400">Candidatos evaluados</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-[#2EC4B6]">USD</p>
-                <p className="text-xs text-[#1F4E79]/70 dark:text-gray-400">Compensación</p>
+                <p className="text-2xl font-bold text-[#2EC4B6]">+<CountUp end={15} /></p>
+                <p className="text-xs text-[#1F4E79]/70 dark:text-gray-400">Empresas confían</p>
               </div>
             </div>
             <div className="mt-8 flex items-center gap-4">

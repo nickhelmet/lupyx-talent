@@ -220,7 +220,17 @@ export default function MiCuentaClient() {
                         return `Postulado: ${d.toLocaleDateString("es-AR")} ${d.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}`;
                       })()}
                     </div>
-                    {app.interviewMeta?.notes && (
+                    {/* Public comments from recruiter */}
+                    {((app as unknown as Record<string, unknown>).comments as Array<{ text: string; author: string; createdAt: string }> | undefined)?.map((c, ci) => (
+                      <div key={ci} className="mt-3 rounded-lg bg-[#2EC4B6]/5 p-3">
+                        <div className="flex items-center gap-2 text-xs text-[#2EC4B6]">
+                          <span className="font-semibold">Comentario del reclutador</span>
+                          <span className="text-[#1F4E79]/40">· {new Date(c.createdAt).toLocaleDateString("es-AR")}</span>
+                        </div>
+                        <p className="mt-1 text-sm text-[#1F4E79]/80 dark:text-gray-300">{c.text}</p>
+                      </div>
+                    ))}
+                    {app.interviewMeta?.notes && !((app as unknown as Record<string, unknown>).comments as unknown[])?.length && (
                       <div className="mt-3 rounded-lg bg-[#2EC4B6]/5 p-3">
                         <p className="text-xs font-semibold text-[#2EC4B6]">Comentario del reclutador</p>
                         <p className="mt-1 text-sm text-[#1F4E79]/80 dark:text-gray-300">{app.interviewMeta.notes}</p>
