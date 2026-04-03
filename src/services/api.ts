@@ -46,13 +46,7 @@ async function authFetch(url: string, options: RequestInit = {}) {
 }
 
 export async function fetchJobs() {
-  const appCheckToken = await getAppCheckToken();
-  const headers: Record<string, string> = {};
-  if (appCheckToken) {
-    headers["X-Firebase-AppCheck"] = appCheckToken;
-  }
-
-  const res = await fetch(`${API_BASE}/listJobs`, { headers });
+  const res = await fetch(`${API_BASE}/listJobs`);
   if (!res.ok) throw new Error("Failed to fetch jobs");
   return res.json();
 }
