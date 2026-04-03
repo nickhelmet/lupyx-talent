@@ -40,6 +40,22 @@ export const adminUsage = onRequest({ maxInstances: 1 }, async (req, res) => {
     // CV analysis count
     const analyzedCvs = appsSnap.docs.filter((d) => d.data().cvAnalysis).length;
 
+    // Gemini actual invocations
+    const today = new Date().toISOString().split("T")[0];
+    const todayCounter = await db.doc(`usage_counters/gemini_${today}`).get();
+    const geminiTodayInvocations = todayCounter.data()?.count || 0;
+
+    // Gemini history (last 30 days)
+    const geminiHistory: Record<string, number> = {};
+    const counterSnap = await db.collection("usage_counters").get();
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    counterSnap.docs.forEach((doc) => {
+      const data = doc.data();
+      if (data.date && new Date(data.date).getTime() >= thirtyDaysAgo) {
+        geminiHistory[data.date] = data.count;
+      }
+    });
+
     // Storage usage
     let storageFiles = 0;
     let storageBytes = 0;
@@ -78,6 +94,8 @@ export const adminUsage = onRequest({ maxInstances: 1 }, async (req, res) => {
       },
       gemini: {
         analyzedCvs,
+        todayInvocations: geminiTodayInvocations,
+        history: geminiHistory,
       },
       applicationsByDay: appsByDay,
       statusDistribution: statusDist,

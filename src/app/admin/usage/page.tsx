@@ -9,7 +9,7 @@ import { SkeletonGrid } from "@/components/Skeleton";
 interface UsageData {
   firestore: { totalJobs: number; totalApplications: number; totalUsers: number; rateLimitEntries: number };
   storage: { files: number; bytesUsed: number; mbUsed: number };
-  gemini: { analyzedCvs: number };
+  gemini: { analyzedCvs: number; todayInvocations: number; history: Record<string, number> };
   applicationsByDay: Record<string, number>;
   statusDistribution: Record<string, number>;
   jobsDistribution: Record<string, number>;
@@ -82,12 +82,32 @@ export default function UsagePage() {
             <Sparkles className="h-4 w-4 text-purple-500" /> Gemini AI
           </h2>
           <div className="mt-3 rounded-xl border border-gray-100 bg-white p-4 dark:border-white/10 dark:bg-white/5">
-            <p className="text-2xl font-bold text-[#0B1F3B] dark:text-white">{data.gemini.analyzedCvs}</p>
-            <p className="text-xs text-[#1F4E79]/60 dark:text-gray-400">CVs analizados</p>
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-2xl font-bold text-[#0B1F3B] dark:text-white">{data.gemini.todayInvocations}</p>
+                <p className="text-xs text-[#1F4E79]/60 dark:text-gray-400">invocaciones hoy</p>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold text-[#1F4E79]/40 dark:text-gray-500">{data.gemini.analyzedCvs}</p>
+                <p className="text-[10px] text-[#1F4E79]/40">CVs con análisis</p>
+              </div>
+            </div>
             <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
-              <div className="h-full rounded-full bg-purple-500" style={{ width: `${Math.min(data.gemini.analyzedCvs / 15, 100)}%` }} />
+              <div className="h-full rounded-full bg-purple-500" style={{ width: `${Math.min(data.gemini.todayInvocations / 15, 100)}%` }} />
             </div>
             <p className="mt-1 text-[10px] text-[#1F4E79]/40">de 1500 requests/día free tier</p>
+            {Object.keys(data.gemini.history).length > 1 && (
+              <div className="mt-3 flex items-end gap-1">
+                {Object.entries(data.gemini.history).sort().slice(-14).map(([day, count]) => {
+                  const max = Math.max(...Object.values(data.gemini.history));
+                  return (
+                    <div key={day} className="flex flex-1 flex-col items-center gap-0.5" title={`${day}: ${count}`}>
+                      <div className="w-full rounded-t bg-purple-400" style={{ height: `${Math.max((count / max) * 40, 4)}px` }} />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -117,6 +117,14 @@ export const analyzeCv = onRequest({ maxInstances: 1, secrets: ["GEMINI_API_KEY"
   if (!cvPath) { res.status(400).json({ error: "No CV uploaded for this application" }); return; }
 
   try {
+    // Track Gemini invocation
+    const today = new Date().toISOString().split("T")[0];
+    const counterRef = db.doc(`usage_counters/gemini_${today}`);
+    await db.runTransaction(async (tx) => {
+      const doc = await tx.get(counterRef);
+      tx.set(counterRef, { count: (doc.data()?.count || 0) + 1, date: today }, { merge: true });
+    });
+
     // Download CV from Storage
     const bucket = getStorage().bucket();
     const [buffer] = await bucket.file(cvPath).download();
