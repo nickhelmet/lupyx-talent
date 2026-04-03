@@ -62,6 +62,13 @@ export async function fetchMyApplications() {
   return authFetch(`${API_BASE}/listApplications`);
 }
 
+export async function withdrawApplication(applicationId: string) {
+  return authFetch(`${API_BASE}/withdrawApplication`, {
+    method: "POST",
+    body: JSON.stringify({ applicationId }),
+  });
+}
+
 export async function fetchProfile() {
   return authFetch(`${API_BASE}/userProfile`);
 }

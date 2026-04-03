@@ -40,6 +40,7 @@
       { "source": "/api/jobs", "function": "listJobs" },
       { "source": "/api/applications", "function": "submitApplication" },
       { "source": "/api/my-applications", "function": "listApplications" },
+      { "source": "/api/my-applications/withdraw", "function": "withdrawApplication" },
       { "source": "/api/user/profile", "function": "userProfile" },
       { "source": "/api/notifications", "function": "getNotifications" },
       { "source": "/api/notifications/read", "function": "markNotificationRead" },

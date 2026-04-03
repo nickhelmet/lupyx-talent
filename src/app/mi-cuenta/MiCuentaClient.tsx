@@ -226,6 +226,23 @@ export default function MiCuentaClient() {
                         <p className="mt-1 text-sm text-[#1F4E79]/80 dark:text-gray-300">{app.interviewMeta.notes}</p>
                       </div>
                     )}
+                    {app.status === "PENDING" && (
+                      <button
+                        onClick={async () => {
+                          if (!confirm("¿Estás seguro de retirar tu postulación? Podrás volver a postularte después.")) return;
+                          try {
+                            const { withdrawApplication } = await import("@/services/api");
+                            await withdrawApplication(app.id);
+                            setApps((prev) => prev.filter((a) => a.id !== app.id));
+                          } catch {
+                            setAppsError("Error al retirar postulación");
+                          }
+                        }}
+                        className="mt-3 cursor-pointer text-xs text-red-500 hover:underline"
+                      >
+                        Retirar postulación
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>

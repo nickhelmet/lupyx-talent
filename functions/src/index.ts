@@ -7,6 +7,7 @@ export { listJobs } from "./jobs";
 
 // User (auth required)
 export { submitApplication, listApplications } from "./applications";
+export { withdrawApplication } from "./updateApplication";
 export { userProfile } from "./userProfile";
 export { getNotifications, markNotificationRead } from "./notifications";
 
