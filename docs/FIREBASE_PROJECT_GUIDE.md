@@ -1129,6 +1129,26 @@ Hacer fire-and-forget (no bloquear el login si falla).
 ### 404 Page
 Crear `src/app/not-found.tsx` con branding. Usar `Link` de next/link (no `<a>`).
 
+### Firebase Storage setup
+1. Firebase Console → Storage → **Get started**
+2. Elegir **Production mode** (rules deny-all, acceso solo via Admin SDK)
+3. Ubicación: **us-central1** (gratis) — no southamerica-east1 (pago)
+4. Deploy rules: `firebase deploy --only storage`
+
+> **Importante:** El bucket NO se crea automáticamente con `firebase init`. Hay que ir a la Console manualmente.
+
+### Perfil de usuario + pre-fill en formularios
+Patrón: el usuario completa su perfil una vez, los datos se reutilizan en cada formulario:
+1. Cloud Function `userProfile` (GET/POST) para leer/guardar perfil
+2. En Mi cuenta: formulario editable con los campos del perfil
+3. En cada formulario de acción (postularse, etc): `fetchProfile()` y pre-fill con `defaultValue`
+
+### Onboarding progress
+Mostrar barra de progreso para nuevos usuarios:
+1. Calcular pasos completados desde Firestore (perfil, CV, postulación)
+2. Componente con checkmarks + progress bar
+3. Links directos a cada paso pendiente
+
 ### Admin CRUD
 Forms completos para crear/editar items principales.
 Conectar a Cloud Functions con App Check + Auth token.

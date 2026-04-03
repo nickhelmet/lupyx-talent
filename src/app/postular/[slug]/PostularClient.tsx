@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { submitApplication } from "@/services/api";
@@ -25,6 +25,14 @@ export default function PostularClient() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cvFile, setCvFile] = useState<File | null>(null);
+  const [profile, setProfile] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!user || authLoading) return;
+    import("@/services/api").then(({ fetchProfile }) => {
+      fetchProfile().then((data) => setProfile(data)).catch(() => {});
+    });
+  }, [user, authLoading]);
 
   if (authLoading) {
     return (
@@ -165,24 +173,24 @@ export default function PostularClient() {
 
           <div>
             <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">Teléfono *</label>
-            <input name="phone" type="tel" required placeholder="+54 11 1234-5678" className={inputClass} />
+            <input name="phone" type="tel" required defaultValue={profile.phone || ""} placeholder="+54 11 1234-5678" className={inputClass} />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">Ciudad</label>
-              <input name="city" placeholder="Buenos Aires" className={inputClass} />
+              <input name="city" defaultValue={profile.city || ""} placeholder="Buenos Aires" className={inputClass} />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">DNI</label>
-              <input name="dni" placeholder="12345678" className={inputClass} />
+              <input name="dni" defaultValue={profile.dni || ""} placeholder="12345678" className={inputClass} />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">Fecha de nacimiento</label>
-              <input name="birthDate" type="date" className={inputClass} />
+              <input name="birthDate" type="date" defaultValue={profile.birthDate || ""} className={inputClass} />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">Nivel educativo</label>
