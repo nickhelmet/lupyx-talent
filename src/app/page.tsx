@@ -5,6 +5,7 @@ import CTABanner from "@/components/CTABanner";
 import TrustedBy from "@/components/TrustedBy";
 import AboutUs from "@/components/AboutUs";
 import Testimonials from "@/components/Testimonials";
+import FAQ from "@/components/FAQ";
 import Contact from "@/components/Contact";
 
 export default function Home() {
@@ -16,6 +17,7 @@ export default function Home() {
       <TrustedBy />
       <AboutUs />
       <Testimonials />
+      <FAQ />
       <Contact />
     </PublicLayout>
   );

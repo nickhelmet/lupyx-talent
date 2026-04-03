@@ -1,13 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Loader2, Plus } from "lucide-react";
 import { getFirebaseAuth } from "@/lib/firebase";
 import { getApiBase } from "@/lib/environment";
 
 export default function NewJobPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const prefill = {
+    title: searchParams.get("title") || "",
+    company: searchParams.get("company") || "",
+    description: searchParams.get("description") || "",
+    requirements: searchParams.get("requirements") || "",
+    location: searchParams.get("location") || "",
+    tags: searchParams.get("tags") || "",
+    linkedinUrl: searchParams.get("linkedinUrl") || "",
+  };
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,28 +80,28 @@ export default function NewJobPage() {
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         <div>
           <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">Título del puesto *</label>
-          <input name="title" required placeholder="Senior Backend Engineer" className={inputClass} />
+          <input name="title" required defaultValue={prefill.title} placeholder="Senior Backend Engineer" className={inputClass} />
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">Empresa *</label>
-          <input name="company" required placeholder="Nombre de la empresa o 'Confidencial'" className={inputClass} />
+          <input name="company" required defaultValue={prefill.company} placeholder="Nombre de la empresa o 'Confidencial'" className={inputClass} />
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">Descripción *</label>
-          <textarea name="description" required rows={4} placeholder="Descripción del puesto..." className={`${inputClass} resize-none`} />
+          <textarea name="description" required rows={4} defaultValue={prefill.description} placeholder="Descripción del puesto..." className={`${inputClass} resize-none`} />
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">Requisitos</label>
-          <textarea name="requirements" rows={3} placeholder="Requisitos del puesto..." className={`${inputClass} resize-none`} />
+          <textarea name="requirements" rows={3} defaultValue={prefill.requirements} placeholder="Requisitos del puesto..." className={`${inputClass} resize-none`} />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">Ubicación</label>
-            <input name="location" placeholder="Remoto LATAM / Buenos Aires" className={inputClass} />
+            <input name="location" defaultValue={prefill.location} placeholder="Remoto LATAM / Buenos Aires" className={inputClass} />
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">Tipo</label>
@@ -106,12 +116,12 @@ export default function NewJobPage() {
 
         <div>
           <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">Link de LinkedIn</label>
-          <input name="linkedinUrl" type="url" placeholder="https://linkedin.com/jobs/..." className={inputClass} />
+          <input name="linkedinUrl" type="url" defaultValue={prefill.linkedinUrl} placeholder="https://linkedin.com/jobs/..." className={inputClass} />
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">Tags (separados por coma)</label>
-          <input name="tags" placeholder="Java, Backend, +4 años exp." className={inputClass} />
+          <input name="tags" defaultValue={prefill.tags} placeholder="Java, Backend, +4 años exp." className={inputClass} />
         </div>
 
         <button

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Pause, Play, Plus, Edit, Loader2, Users, XCircle } from "lucide-react";
+import { Pause, Play, Plus, Edit, Loader2, Users, XCircle, Copy } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { adminFetch } from "@/services/adminApi";
 import type { Job, Application } from "@/types";
@@ -13,6 +14,7 @@ const statusStyles: Record<string, string> = {
 };
 
 export default function AdminJobs() {
+  const router = useRouter();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [appCounts, setAppCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -149,6 +151,20 @@ export default function AdminJobs() {
               >
                 <Edit className="h-4 w-4" />
               </Link>
+              <button
+                onClick={() => {
+                  const params = new URLSearchParams({
+                    title: job.title, company: job.company, description: job.description,
+                    requirements: job.requirements || "", location: job.location || "",
+                    tags: (job.tags || []).join(", "), linkedinUrl: job.linkedinUrl || "",
+                  });
+                  router.push(`/admin/jobs/new?${params.toString()}`);
+                }}
+                className="cursor-pointer text-[#1F4E79]/40 hover:text-[#4FA3D1] dark:text-gray-500"
+                aria-label="Duplicar"
+              >
+                <Copy className="h-4 w-4" />
+              </button>
               <button
                 onClick={() => toggleStatus(job.slug || job.id, job.status)}
                 disabled={actionLoading === (job.slug || job.id)}

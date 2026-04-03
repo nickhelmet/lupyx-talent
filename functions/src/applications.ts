@@ -176,7 +176,16 @@ export const listApplications = onRequest({ maxInstances: 1 }, async (req, res) 
       .orderBy("appliedAt", "desc")
       .get();
 
-    const apps = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const apps = snapshot.docs.map((doc) => {
+      const data: Record<string, unknown> = { id: doc.id, ...doc.data() };
+      // Filter out internal comments — candidate should not see them
+      if (Array.isArray(data.comments)) {
+        data.comments = data.comments.filter((c: { isInternal?: boolean }) => !c.isInternal);
+      }
+      // Remove cvAnalysis — admin-only data
+      delete data.cvAnalysis;
+      return data;
+    });
     res.status(200).json(apps);
   } catch (error) {
     console.error("listApplications error:", error);

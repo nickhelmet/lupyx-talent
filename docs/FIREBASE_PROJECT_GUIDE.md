@@ -1164,6 +1164,18 @@ useEffect(() => {
 ```
 Bajo costo: 1 read de Firestore cada 30s. Para tiempo real verdadero, usar Firestore `onSnapshot`.
 
+### Data filtering by role
+When returning data to non-admin users, filter out sensitive fields on the backend:
+- Remove `isInternal: true` comments from candidate's view
+- Remove admin-only data like `cvAnalysis`
+- Never trust the frontend to hide data — always filter server-side
+
+### FAQ section
+Accordion component with `AnimatePresence` for smooth open/close. Common pattern for landing pages. Improves SEO (Google can index Q&A content).
+
+### Duplicate/template feature
+"Duplicate" button passes current item data as URL query params to the create form. The form reads `useSearchParams()` and pre-fills with `defaultValue`.
+
 ### Gemini: CEFR language scale + job match
 Al analizar documentos con Gemini, enviar contexto adicional:
 - Descripción del job al que aplica → match score 0-100%
