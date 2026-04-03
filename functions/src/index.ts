@@ -16,6 +16,7 @@ export { createJob, updateJob, updateJobStatus, adminListJobs } from "./adminJob
 export { adminListApplications, updateApplicationStatus, addInterviewNotes, manageInterviewRounds } from "./adminApplications";
 export { listUsers, updateUserRole, toggleUserStatus, adminDashboard } from "./adminUsers";
 export { fraudAnalysis } from "./fraudDetection";
+export { adminUsage } from "./adminUsage";
 export { getAllowlist, addAllowlistEmail, removeAllowlistEmail } from "./adminAllowlist";
 export { addComment, getApplicationDetail } from "./adminComments";
 export { analyzeCv } from "./cvAnalysis";

@@ -45,6 +45,7 @@
       { "source": "/api/notifications", "function": "getNotifications" },
       { "source": "/api/notifications/read", "function": "markNotificationRead" },
       { "source": "/api/admin/jobs/list", "function": "adminListJobs" },
+      { "source": "/api/admin/usage", "function": "adminUsage" },
       { "source": "/api/admin/dashboard", "function": "adminDashboard" },
       { "source": "/api/admin/jobs/create", "function": "createJob" },
       { "source": "/api/admin/jobs/update", "function": "updateJob" },

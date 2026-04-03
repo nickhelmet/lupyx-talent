@@ -11,6 +11,7 @@ import {
   FileText,
   Users,
   Shield,
+  BarChart3,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -21,6 +22,7 @@ const adminTabs = [
   { href: "/admin/applications", icon: FileText, label: "Postulaciones" },
   { href: "/admin/users", icon: Users, label: "Usuarios" },
   { href: "/admin/allowlist", icon: Shield, label: "Accesos" },
+  { href: "/admin/usage", icon: BarChart3, label: "Uso" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
