@@ -1173,6 +1173,22 @@ When returning data to non-admin users, filter out sensitive fields on the backe
 ### FAQ section
 Accordion component with `AnimatePresence` for smooth open/close. Common pattern for landing pages. Improves SEO (Google can index Q&A content).
 
+### SEO: metadata dinámica por página
+Para static export, usar `generateMetadata` en cada page:
+```typescript
+export function generateMetadata({ params }): Metadata {
+  return { title: `${title} | Brand`, openGraph: { url: `https://.../${params.slug}/` } };
+}
+```
+Cada página tiene su propio `<title>` y OG tags en el HTML estático.
+
+### Lazy loading below-the-fold
+Usar `next/dynamic` para secciones no visibles al inicio:
+```typescript
+const AboutUs = dynamic(() => import("@/components/AboutUs"));
+```
+Reduce bundle inicial, mejora LCP y Time to Interactive.
+
 ### Duplicate/template feature
 "Duplicate" button passes current item data as URL query params to the create form. The form reads `useSearchParams()` and pre-fills with `defaultValue`.
 
