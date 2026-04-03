@@ -335,7 +335,11 @@ export default function AdminApplications() {
                           if (!res.ok) throw new Error("Download failed");
                           const blob = await res.blob();
                           const url = URL.createObjectURL(blob);
-                          window.open(url, "_blank");
+                          const a = document.createElement("a");
+                          a.href = url;
+                          a.download = `CV-${app.firstName}_${app.lastName}.pdf`;
+                          a.click();
+                          URL.revokeObjectURL(url);
                         } catch {
                           setError("Error al descargar CV");
                         }
