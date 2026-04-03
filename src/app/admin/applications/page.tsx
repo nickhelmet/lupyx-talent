@@ -337,7 +337,7 @@ export default function AdminApplications() {
                           const url = URL.createObjectURL(blob);
                           const a = document.createElement("a");
                           a.href = url;
-                          a.download = `CV-${app.firstName}_${app.lastName}.pdf`;
+                          a.download = app.cvPath?.split("/").pop()?.replace(/^\d+-/, "") || `CV-${app.firstName}_${app.lastName}.pdf`;
                           a.click();
                           URL.revokeObjectURL(url);
                         } catch {
