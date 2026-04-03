@@ -82,7 +82,7 @@ export const analyzeCv = onRequest({ maxInstances: 1, secrets: ["GEMINI_API_KEY"
     // Call Gemini
     const genai = new GoogleGenAI({ apiKey });
     const response = await genai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: [
         {
           role: "user",

@@ -325,10 +325,16 @@ export default function AdminApplications() {
                     <button
                       onClick={async () => {
                         try {
-                          const { url } = await adminFetch("downloadCv", {
+                          const auth = (await import("@/lib/firebase")).getFirebaseAuth();
+                          const token = await auth.currentUser?.getIdToken();
+                          const res = await fetch("https://us-central1-lupyx-talent.cloudfunctions.net/downloadCv", {
                             method: "POST",
+                            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                             body: JSON.stringify({ path: app.cvPath }),
                           });
+                          if (!res.ok) throw new Error("Download failed");
+                          const blob = await res.blob();
+                          const url = URL.createObjectURL(blob);
                           window.open(url, "_blank");
                         } catch {
                           setError("Error al descargar CV");

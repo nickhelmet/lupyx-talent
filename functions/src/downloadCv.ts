@@ -19,12 +19,18 @@ export const downloadCv = onRequest({ maxInstances: 1 }, async (req, res) => {
 
   try {
     const bucket = getStorage().bucket();
-    const [url] = await bucket.file(path).getSignedUrl({
-      action: "read",
-      expires: Date.now() + 15 * 60 * 1000,
-    });
-    res.status(200).json({ url });
-  } catch {
-    res.status(404).json({ error: "File not found" });
+    const file = bucket.file(path);
+    const [exists] = await file.exists();
+    if (!exists) { res.status(404).json({ error: "File not found" }); return; }
+
+    const [buffer] = await file.download();
+    const fileName = path.split("/").pop() || "cv.pdf";
+
+    res.set("Content-Type", "application/pdf");
+    res.set("Content-Disposition", `attachment; filename="${fileName}"`);
+    res.status(200).send(buffer);
+  } catch (error) {
+    console.error("downloadCv error:", error);
+    res.status(500).json({ error: "Failed to download" });
   }
 });
