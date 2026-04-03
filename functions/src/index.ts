@@ -4,6 +4,7 @@ initializeApp();
 
 // Public
 export { listJobs } from "./jobs";
+export { subscribe } from "./subscribe";
 
 // User (auth required)
 export { submitApplication, listApplications } from "./applications";

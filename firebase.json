@@ -38,6 +38,7 @@
     "rewrites": [
       { "source": "/sitemap.xml", "function": "sitemap" },
       { "source": "/api/jobs", "function": "listJobs" },
+      { "source": "/api/subscribe", "function": "subscribe" },
       { "source": "/api/applications", "function": "submitApplication" },
       { "source": "/api/my-applications", "function": "listApplications" },
       { "source": "/api/my-applications/withdraw", "function": "withdrawApplication" },

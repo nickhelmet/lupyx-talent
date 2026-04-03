@@ -1189,6 +1189,10 @@ const AboutUs = dynamic(() => import("@/components/AboutUs"));
 ```
 Reduce bundle inicial, mejora LCP y Time to Interactive.
 
+### Email subscription (newsletter)
+Simple subscribe form: email → Cloud Function → Firestore `subscribers/{email}`.
+No auth required, rate limited. Useful for notifying about new content.
+
 ### Duplicate/template feature
 "Duplicate" button passes current item data as URL query params to the create form. The form reads `useSearchParams()` and pre-fills with `defaultValue`.
 

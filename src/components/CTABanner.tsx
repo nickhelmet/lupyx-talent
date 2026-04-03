@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import SubscribeForm from "./SubscribeForm";
 
 export default function CTABanner() {
   return (
@@ -39,6 +40,10 @@ export default function CTABanner() {
             >
               Conocé nuestro proceso
             </Link>
+          </div>
+          <div className="mt-8 mx-auto max-w-md">
+            <p className="mb-3 text-xs text-white/50">Suscribite para recibir nuevas búsquedas</p>
+            <SubscribeForm />
           </div>
         </motion.div>
       </div>
