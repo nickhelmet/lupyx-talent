@@ -76,7 +76,7 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      {loading && (
+      {loading ? (
         <div className="space-y-8">
           <SkeletonGrid />
           <div className="grid gap-6 lg:grid-cols-2">
@@ -84,7 +84,7 @@ export default function AdminDashboard() {
             <SkeletonList count={4} />
           </div>
         </div>
-      )}
+      ) : (<>
 
       {/* Stats cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -193,6 +193,7 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+      </>)}
     </div>
   );
 }
