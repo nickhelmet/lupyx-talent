@@ -152,7 +152,7 @@ export default function MiCuentaClient() {
             {profileLoading ? (
               <div className="flex items-center gap-2 text-sm text-[#1F4E79]/50"><Loader2 className="h-4 w-4 animate-spin" /> Cargando perfil...</div>
             ) : (
-              <form onSubmit={saveProfile} className="space-y-4">
+              <form onSubmit={saveProfile} key={JSON.stringify(profile)} className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">Teléfono</label>
