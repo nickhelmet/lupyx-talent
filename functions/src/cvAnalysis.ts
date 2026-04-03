@@ -44,8 +44,9 @@ Si ES un CV, extraé:
   "languages": [
     {
       "language": "Español",
-      "level": "Nativo/Avanzado/Intermedio/Básico",
-      "certifications": "TOEFL 100, Cambridge C1, etc. (si aplica)"
+      "level": "C2 (Nativo)",
+      "cefr": "C2",
+      "certifications": "TOEFL 100, Cambridge C1, IELTS 7.5, DELE B2, etc. (si aplica)"
     }
   ],
   "certifications": ["Certificación 1"],
@@ -65,11 +66,20 @@ Si ES un CV, extraé:
   ]
 }
 
-Para determinar el nivel de idioma:
-- Si tiene certificación (TOEFL, IELTS, Cambridge, DELE): usar el nivel del certificado
-- Si trabajó en empresas internacionales o tiene experiencia en el idioma: inferir Avanzado
-- Si solo menciona el idioma sin contexto: inferir Intermedio
-- Si cursó el idioma en la universidad: inferir Intermedio-Avanzado
+Para determinar el nivel de idioma, usar la escala CEFR (Marco Común Europeo):
+- A1 (Principiante): frases básicas
+- A2 (Elemental): comunicación cotidiana simple
+- B1 (Intermedio): comprende ideas principales, puede conversar
+- B2 (Intermedio-Alto): textos complejos, comunicación fluida
+- C1 (Avanzado): comunicación sin dificultad, textos complejos
+- C2 (Nativo/Bilingüe): dominio total
+
+Cómo inferir:
+- Certificación explícita (TOEFL 90+, IELTS 7+, Cambridge C1, DELE B2): usar nivel del certificado
+- Experiencia laboral en empresas internacionales o en el idioma: B2-C1
+- Estudios universitarios del idioma: B1-B2
+- Solo menciona el idioma sin contexto: A2-B1
+- Idioma nativo o bilingüe declarado: C2
 
 Para el job_match:
 - Comparar skills y experiencia del CV contra los requisitos de la búsqueda
