@@ -1158,8 +1158,18 @@ Conectar a Cloud Functions con App Check + Auth token.
 Para procesar documentos (PDFs, imágenes) con IA:
 
 **1. Obtener API key:**
-- https://aistudio.google.com/apikey → Create API key → seleccionar proyecto
-- Free tier: 1500 requests/día (Gemini Flash)
+
+> **IMPORTANTE:** NO usar AI Studio para crear la key. AI Studio la asocia a un proyecto genérico (`gen-lang-client-*`), no a tu proyecto Firebase. Esto causa quota 0.
+
+Crear directamente en tu proyecto Firebase:
+```bash
+gcloud services enable generativelanguage.googleapis.com --project=tu-proyecto
+gcloud alpha services api-keys create \
+  --display-name="Gemini API Key" \
+  --project=tu-proyecto \
+  --api-target=service=generativelanguage.googleapis.com
+```
+Free tier: 1500 requests/día, 1M tokens/min (Gemini Flash)
 
 **2. Configurar secret:**
 ```bash
