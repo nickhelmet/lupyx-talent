@@ -544,9 +544,15 @@ export default function AdminApplications() {
                       {app.cvAnalysis.better_fit_jobs && app.cvAnalysis.better_fit_jobs.length > 0 && (
                         <div>
                           <p className="text-xs text-[#1F4E79]/50">Podría encajar mejor en:</p>
-                          {app.cvAnalysis.better_fit_jobs.map((j: { job_title: string; reason: string }, i: number) => (
-                            <p key={i} className="text-xs text-[#1F4E79]/70 dark:text-gray-400">→ <strong>{j.job_title}</strong>: {j.reason}</p>
-                          ))}
+                          {app.cvAnalysis.better_fit_jobs.map((j: { job_title: string; reason: string }, i: number) => {
+                            const slug = j.job_title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+                            return (
+                              <div key={i} className="mt-1">
+                                <a href={`/busquedas/${slug}/`} className="text-xs font-semibold text-[#2EC4B6] hover:underline">→ {j.job_title}</a>
+                                <p className="text-xs text-[#1F4E79]/60 dark:text-gray-500">{j.reason}</p>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
