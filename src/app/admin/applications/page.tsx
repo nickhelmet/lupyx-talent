@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Loader2, MessageSquare, ChevronDown, ChevronUp, Send, Sparkles, Download } from "lucide-react";
+import { Search, Loader2, MessageSquare, ChevronDown, ChevronUp, Send, Sparkles, Download, Trash2 } from "lucide-react";
 import { adminFetch } from "@/services/adminApi";
 import Pagination from "@/components/Pagination";
 import { timeAgo } from "@/lib/utils";
@@ -165,6 +165,24 @@ export default function AdminApplications() {
       setError(e instanceof Error ? e.message : "Error");
     } finally {
       setSending(false);
+    }
+  }
+
+  const [deletingApp, setDeletingApp] = useState<string | null>(null);
+
+  async function deleteApp(appId: string, name: string) {
+    if (!confirm(`¿Eliminar la postulación de "${name}"? Se eliminará también el CV. Esta acción no se puede deshacer.`)) return;
+    setDeletingApp(appId);
+    try {
+      await adminFetch("deleteApplication", {
+        method: "POST",
+        body: JSON.stringify({ applicationId: appId }),
+      });
+      await loadApps();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error deleting application");
+    } finally {
+      setDeletingApp(null);
     }
   }
 
@@ -642,6 +660,18 @@ export default function AdminApplications() {
                       {sending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
                     </button>
                   </div>
+                </div>
+
+                {/* Delete application */}
+                <div className="mt-6 border-t border-gray-100 pt-4 dark:border-white/10">
+                  <button
+                    onClick={() => deleteApp(app.id, `${app.firstName} ${app.lastName}`)}
+                    disabled={deletingApp === app.id}
+                    className="flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-xs font-semibold text-red-500 transition-colors hover:bg-red-50 disabled:opacity-50 dark:border-red-800 dark:hover:bg-red-900/20"
+                  >
+                    {deletingApp === app.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                    Eliminar postulación
+                  </button>
                 </div>
               </div>
             )}

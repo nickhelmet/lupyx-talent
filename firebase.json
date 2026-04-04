@@ -66,6 +66,10 @@
       { "source": "/api/admin/applications/detail", "function": "getApplicationDetail" },
       { "source": "/api/admin/applications/analyze-cv", "function": "analyzeCv" },
       { "source": "/api/admin/cv/download", "function": "downloadCv" },
+      { "source": "/api/admin/applications/delete", "function": "deleteApplication" },
+      { "source": "/api/admin/candidates", "function": "listCandidates" },
+      { "source": "/api/admin/candidates/add", "function": "addCandidate" },
+      { "source": "/api/admin/candidates/delete", "function": "deleteCandidate" },
       { "source": "**", "destination": "/index.html" }
     ]
   },

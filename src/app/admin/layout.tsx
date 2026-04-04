@@ -12,6 +12,7 @@ import {
   Users,
   Shield,
   BarChart3,
+  UserSearch,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -21,6 +22,7 @@ const adminTabs = [
   { href: "/admin/jobs", icon: Briefcase, label: "Búsquedas" },
   { href: "/admin/applications", icon: FileText, label: "Postulaciones" },
   { href: "/admin/users", icon: Users, label: "Usuarios" },
+  { href: "/admin/candidates", icon: UserSearch, label: "Candidatos" },
   { href: "/admin/allowlist", icon: Shield, label: "Accesos" },
   { href: "/admin/usage", icon: BarChart3, label: "Uso" },
 ];
