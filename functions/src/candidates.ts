@@ -16,7 +16,59 @@ export const listCandidates = onRequest({ maxInstances: 1 }, async (req, res) =>
 
   const db = getFirestore();
   const snapshot = await db.collection("candidates").orderBy("createdAt", "desc").limit(200).get();
-  const candidates = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+  // Enrich candidates with their application data
+  const candidates = await Promise.all(snapshot.docs.map(async (doc) => {
+    const data = { id: doc.id, ...doc.data() } as Record<string, unknown>;
+    const email = data.email as string | null;
+
+    if (email) {
+      const appsSnap = await db.collection("applications")
+        .where("email", "==", email)
+        .orderBy("appliedAt", "desc")
+        .limit(10)
+        .get();
+
+      data.applications = appsSnap.docs.map((appDoc) => {
+        const app = appDoc.data();
+        return {
+          id: appDoc.id,
+          jobTitle: app.jobTitle,
+          jobCompany: app.jobCompany,
+          status: app.status,
+          appliedAt: app.appliedAt,
+          educationLevel: app.educationLevel,
+          dni: app.dni,
+          birthDate: app.birthDate,
+          address: app.address,
+          coverLetter: app.coverLetter,
+          cvPath: app.cvPath,
+          cvAnalysis: app.cvAnalysis,
+          scores: app.scores,
+        };
+      });
+
+      // Pull user profile if exists
+      const usersSnap = await db.collection("users")
+        .where("email", "==", email)
+        .limit(1)
+        .get();
+
+      if (!usersSnap.empty) {
+        const u = usersSnap.docs[0].data();
+        data.userProfile = {
+          summary: u.profile?.summary || null,
+          skills: u.profile?.skills || [],
+          languages: u.profile?.languages || [],
+          educationLevel: u.educationLevel || null,
+          image: u.image || null,
+        };
+      }
+    }
+
+    return data;
+  }));
+
   res.status(200).json(candidates);
 });
 
