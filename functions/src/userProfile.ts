@@ -19,7 +19,8 @@ export const userProfile = onRequest({ maxInstances: 1 }, async (req, res) => {
   if (req.method === "GET") {
     const doc = await db.doc(`users/${user.uid}`).get();
     if (!doc.exists) {
-      res.status(404).json({ error: "Profile not found" });
+      // Return empty profile instead of 404 — profile gets created on first save
+      res.status(200).json({ uid: user.uid, email: user.email });
       return;
     }
     res.status(200).json({ uid: user.uid, ...doc.data() });

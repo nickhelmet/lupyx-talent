@@ -47,8 +47,8 @@ export default function MiCuentaClient() {
     let cancelled = false;
 
     fetchProfile()
-      .then((data) => { if (!cancelled) setProfile(data); })
-      .catch(() => {})
+      .then((data) => { if (!cancelled) setProfile(data || {}); })
+      .catch((err) => { console.warn("fetchProfile error:", err); })
       .finally(() => { if (!cancelled) setProfileLoading(false); });
 
     fetchMyApplications()
