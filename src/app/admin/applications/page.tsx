@@ -75,11 +75,18 @@ interface CvAnalysis {
   better_fit_jobs?: Array<{ job_title: string; reason: string }>;
 }
 
+interface ScreeningAnswer {
+  questionId: string;
+  questionText: string;
+  answer: string;
+}
+
 type AppWithComments = Application & {
   comments?: Comment[];
   cvAnalysis?: CvAnalysis;
   cvAnalyzedAt?: string;
   statusHistory?: StatusEvent[];
+  screeningAnswers?: ScreeningAnswer[];
 };
 
 export default function AdminApplications() {
@@ -428,6 +435,21 @@ export default function AdminApplications() {
                     >
                       <Download className="h-3.5 w-3.5" /> Descargar CV
                     </button>
+                  </div>
+                )}
+
+                {/* Screening Answers */}
+                {app.screeningAnswers && app.screeningAnswers.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-xs font-semibold text-[#1F4E79]/50 dark:text-gray-500">Respuestas de screening</p>
+                    <div className="mt-2 space-y-2">
+                      {app.screeningAnswers.map((sa, i) => (
+                        <div key={i} className="rounded-lg bg-gray-50 p-2.5 dark:bg-white/5">
+                          <p className="text-[11px] font-medium text-[#1F4E79]/50 dark:text-gray-500">{sa.questionText}</p>
+                          <p className="mt-0.5 text-sm font-medium text-[#0B1F3B] dark:text-white">{sa.answer}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 

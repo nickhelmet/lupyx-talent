@@ -26,13 +26,24 @@ export default function PostularClient() {
   const [error, setError] = useState<string | null>(null);
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [profile, setProfile] = useState<Record<string, string>>({});
+  const [screeningQuestions, setScreeningQuestions] = useState<Array<{ id: string; text: string; type: string; required: boolean; options?: string[] }>>([]);
+  const [screeningAnswers, setScreeningAnswers] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!user || authLoading) return;
     import("@/services/api").then(({ fetchProfile }) => {
       fetchProfile().then((data) => setProfile(data)).catch(() => {});
     });
-  }, [user, authLoading]);
+    // Fetch job to get screening questions
+    import("@/services/api").then(({ fetchJobs }) => {
+      fetchJobs().then((jobs: Array<{ slug: string; screeningQuestions?: typeof screeningQuestions }>) => {
+        const job = jobs.find((j) => j.slug === slug);
+        if (job?.screeningQuestions?.length) {
+          setScreeningQuestions(job.screeningQuestions);
+        }
+      }).catch(() => {});
+    });
+  }, [user, authLoading, slug]);
 
   if (authLoading) {
     return (
@@ -118,6 +129,11 @@ export default function PostularClient() {
         coverLetter: form.get("coverLetter"),
         cvFileName: cvFile.name,
         cvBase64,
+        screeningAnswers: screeningQuestions.map((q) => ({
+          questionId: q.id,
+          questionText: q.text,
+          answer: screeningAnswers[q.id] || "",
+        })).filter((a) => a.answer),
       });
       setSuccess(true);
       track.jobApplyComplete(slug);
@@ -202,6 +218,71 @@ export default function PostularClient() {
               </select>
             </div>
           </div>
+
+          {/* Screening Questions */}
+          {screeningQuestions.length > 0 && (
+            <div className="rounded-xl border border-[#2EC4B6]/20 bg-[#2EC4B6]/5 p-5 dark:bg-[#2EC4B6]/5">
+              <p className="text-sm font-semibold text-[#0B1F3B] dark:text-white">Preguntas adicionales</p>
+              <p className="mt-0.5 text-xs text-[#1F4E79]/50 dark:text-gray-500">Respondé las siguientes preguntas para completar tu postulación.</p>
+              <div className="mt-4 space-y-4">
+                {screeningQuestions.map((q) => (
+                  <div key={q.id}>
+                    <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">
+                      {q.text} {q.required && <span className="text-red-500">*</span>}
+                    </label>
+                    {q.type === "text" && (
+                      <input
+                        required={q.required}
+                        value={screeningAnswers[q.id] || ""}
+                        onChange={(e) => setScreeningAnswers({ ...screeningAnswers, [q.id]: e.target.value })}
+                        className={inputClass}
+                      />
+                    )}
+                    {q.type === "number" && (
+                      <input
+                        type="number"
+                        required={q.required}
+                        value={screeningAnswers[q.id] || ""}
+                        onChange={(e) => setScreeningAnswers({ ...screeningAnswers, [q.id]: e.target.value })}
+                        className={inputClass}
+                      />
+                    )}
+                    {q.type === "yesno" && (
+                      <div className="flex gap-4">
+                        {["Sí", "No"].map((opt) => (
+                          <label key={opt} className="flex items-center gap-2 text-sm text-[#0B1F3B] dark:text-white">
+                            <input
+                              type="radio"
+                              name={`screening_${q.id}`}
+                              value={opt}
+                              required={q.required}
+                              checked={screeningAnswers[q.id] === opt}
+                              onChange={() => setScreeningAnswers({ ...screeningAnswers, [q.id]: opt })}
+                              className="accent-[#2EC4B6]"
+                            />
+                            {opt}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                    {q.type === "select" && q.options && (
+                      <select
+                        required={q.required}
+                        value={screeningAnswers[q.id] || ""}
+                        onChange={(e) => setScreeningAnswers({ ...screeningAnswers, [q.id]: e.target.value })}
+                        className={inputClass}
+                      >
+                        <option value="">Seleccionar...</option>
+                        {q.options.map((opt) => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">Carta de presentación</label>

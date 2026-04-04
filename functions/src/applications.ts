@@ -102,6 +102,15 @@ export const submitApplication = onRequest({ maxInstances: 1 }, async (req, res)
       });
     }
 
+    // Screening answers
+    const screeningAnswers = Array.isArray(raw.screeningAnswers)
+      ? raw.screeningAnswers.slice(0, 10).map((a: { questionId?: string; questionText?: string; answer?: string }) => ({
+          questionId: sanitizeString(typeof a.questionId === "string" ? a.questionId : "").slice(0, 10),
+          questionText: sanitizeString(typeof a.questionText === "string" ? a.questionText : "").slice(0, 500),
+          answer: sanitizeString(typeof a.answer === "string" ? a.answer : "").slice(0, 1000),
+        })).filter((a: { questionId: string; answer: string }) => a.questionId && a.answer)
+      : [];
+
     const jobData = jobDoc.data()!;
     const application = {
       userId: user.uid,
@@ -121,6 +130,7 @@ export const submitApplication = onRequest({ maxInstances: 1 }, async (req, res)
       cvPath,
       cvHash,
       cvSize,
+      screeningAnswers,
       status: "PENDING",
       appliedAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),

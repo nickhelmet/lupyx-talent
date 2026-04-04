@@ -2,9 +2,16 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Loader2, Plus } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Trash2, GripVertical } from "lucide-react";
 import { getFirebaseAuth } from "@/lib/firebase";
 import { getApiBase } from "@/lib/environment";
+
+interface ScreeningQuestion {
+  text: string;
+  type: "text" | "yesno" | "select" | "number";
+  required: boolean;
+  options: string[];
+}
 
 export default function NewJobPage() {
   const router = useRouter();
@@ -20,6 +27,7 @@ export default function NewJobPage() {
   };
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [questions, setQuestions] = useState<ScreeningQuestion[]>([]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -46,6 +54,7 @@ export default function NewJobPage() {
           type: form.get("type"),
           linkedinUrl: form.get("linkedinUrl"),
           tags: (form.get("tags") as string)?.split(",").map((t) => t.trim()).filter(Boolean) || [],
+          screeningQuestions: questions.filter((q) => q.text.trim()),
         }),
       });
 
@@ -122,6 +131,98 @@ export default function NewJobPage() {
         <div>
           <label className="mb-1 block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">Tags (separados por coma)</label>
           <input name="tags" defaultValue={prefill.tags} placeholder="Java, Backend, +4 años exp." className={inputClass} />
+        </div>
+
+        {/* Screening Questions */}
+        <div>
+          <div className="flex items-center justify-between">
+            <label className="block text-sm font-medium text-[#0B1F3B] dark:text-gray-200">Preguntas de screening</label>
+            {questions.length < 10 && (
+              <button
+                type="button"
+                onClick={() => setQuestions([...questions, { text: "", type: "text", required: false, options: [] }])}
+                className="flex items-center gap-1 text-xs font-semibold text-[#2EC4B6] hover:underline"
+              >
+                <Plus className="h-3.5 w-3.5" /> Agregar pregunta
+              </button>
+            )}
+          </div>
+          <p className="mt-0.5 text-xs text-[#1F4E79]/50 dark:text-gray-500">
+            Los candidatos responderán estas preguntas al postularse. Máximo 10.
+          </p>
+
+          {questions.length > 0 && (
+            <div className="mt-3 space-y-3">
+              {questions.map((q, i) => (
+                <div key={i} className="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-white/10 dark:bg-white/[0.02]">
+                  <div className="flex items-start gap-2">
+                    <GripVertical className="mt-2.5 h-4 w-4 shrink-0 text-gray-300 dark:text-gray-600" />
+                    <div className="flex-1 space-y-2">
+                      <input
+                        value={q.text}
+                        onChange={(e) => {
+                          const updated = [...questions];
+                          updated[i].text = e.target.value;
+                          setQuestions(updated);
+                        }}
+                        placeholder="Ej: ¿Cuántos años de experiencia tenés en Java?"
+                        className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#2EC4B6] dark:border-white/10 dark:bg-white/5 dark:text-white"
+                      />
+                      <div className="flex flex-wrap items-center gap-3">
+                        <select
+                          value={q.type}
+                          onChange={(e) => {
+                            const updated = [...questions];
+                            updated[i].type = e.target.value as ScreeningQuestion["type"];
+                            if (e.target.value !== "select") updated[i].options = [];
+                            setQuestions(updated);
+                          }}
+                          className="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs outline-none dark:border-white/10 dark:bg-white/5 dark:text-white"
+                        >
+                          <option value="text">Texto libre</option>
+                          <option value="yesno">Sí / No</option>
+                          <option value="number">Numérico</option>
+                          <option value="select">Opciones</option>
+                        </select>
+                        <label className="flex items-center gap-1.5 text-xs text-[#1F4E79]/60 dark:text-gray-400">
+                          <input
+                            type="checkbox"
+                            checked={q.required}
+                            onChange={(e) => {
+                              const updated = [...questions];
+                              updated[i].required = e.target.checked;
+                              setQuestions(updated);
+                            }}
+                            className="rounded"
+                          />
+                          Obligatoria
+                        </label>
+                      </div>
+                      {q.type === "select" && (
+                        <input
+                          value={q.options.join(", ")}
+                          onChange={(e) => {
+                            const updated = [...questions];
+                            updated[i].options = e.target.value.split(",").map((o) => o.trim());
+                            setQuestions(updated);
+                          }}
+                          placeholder="Opciones separadas por coma: Básico, Intermedio, Avanzado"
+                          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs outline-none focus:border-[#2EC4B6] dark:border-white/10 dark:bg-white/5 dark:text-white"
+                        />
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setQuestions(questions.filter((_, j) => j !== i))}
+                      className="mt-2 text-red-400 hover:text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <button

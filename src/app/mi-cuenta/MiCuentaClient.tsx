@@ -104,7 +104,7 @@ export default function MiCuentaClient() {
   const inputClass = "w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-[#2EC4B6] dark:border-white/10 dark:bg-white/5 dark:text-white";
 
   return (
-    <div className="min-h-[60vh] pt-24">
+    <div className="min-h-[60vh] bg-white pt-24 dark:bg-[#0a0f1a]">
       <div className="mx-auto max-w-3xl px-4 pb-20">
         {/* Header */}
         <div className="flex items-center gap-4">
