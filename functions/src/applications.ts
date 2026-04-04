@@ -130,6 +130,48 @@ export const submitApplication = onRequest({ maxInstances: 1 }, async (req, res)
 
     const ref = await db.collection("applications").add(application);
 
+    // Auto-add/update candidate in talent pool
+    try {
+      const candidateQuery = await db.collection("candidates")
+        .where("email", "==", user.email)
+        .limit(1)
+        .get();
+
+      if (candidateQuery.empty) {
+        await db.collection("candidates").add({
+          firstName,
+          lastName,
+          email: user.email,
+          phone: phone || null,
+          city: city || null,
+          skills: [],
+          notes: null,
+          tags: [],
+          source: "application",
+          cvPath: cvPath || null,
+          cvAnalysis: null,
+          matchHistory: [{ jobId, jobTitle: jobData.title, applicationId: ref.id, date: new Date().toISOString() }],
+          createdBy: "system",
+          createdAt: FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+      } else {
+        const candidateDoc = candidateQuery.docs[0];
+        const existing = candidateDoc.data();
+        const history = Array.isArray(existing.matchHistory) ? existing.matchHistory : [];
+        history.push({ jobId, jobTitle: jobData.title, applicationId: ref.id, date: new Date().toISOString() });
+        await candidateDoc.ref.update({
+          phone: phone || existing.phone || null,
+          city: city || existing.city || null,
+          cvPath: cvPath || existing.cvPath || null,
+          matchHistory: history,
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+      }
+    } catch (candidateError) {
+      console.error("Failed to upsert candidate:", candidateError);
+    }
+
     // Notify admins + send emails
     try {
       const allowlistDoc = await db.doc("config/allowlist").get();
