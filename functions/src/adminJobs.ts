@@ -41,11 +41,25 @@ export const createJob = onRequest({ maxInstances: 1 }, async (req, res) => {
     slug = `${baseSlug}-${suffix}`;
   }
 
+  // Screening questions (max 10)
+  const screeningQuestions = Array.isArray(raw.screeningQuestions)
+    ? raw.screeningQuestions.slice(0, 10).map((q: { text?: string; type?: string; required?: boolean; options?: string[] }, i: number) => ({
+        id: `q${i + 1}`,
+        text: sanitizeString(typeof q.text === "string" ? q.text : "").slice(0, 500),
+        type: ["text", "yesno", "select", "number"].includes(q.type || "") ? q.type : "text",
+        required: !!q.required,
+        options: q.type === "select" && Array.isArray(q.options)
+          ? q.options.slice(0, 10).map((o: string) => sanitizeString(o).slice(0, 100)).filter(Boolean)
+          : [],
+      })).filter((q: { text: string }) => q.text.length > 0)
+    : [];
+
   const job = {
     title, company, description, requirements,
     location, type: type || "CONTRACT",
     status: "ACTIVE", slug,
     linkedinUrl, tags,
+    screeningQuestions,
     image: null,
     postedDate: new Date().toISOString(),
     createdAt: FieldValue.serverTimestamp(),
