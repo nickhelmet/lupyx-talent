@@ -33,7 +33,34 @@ export default function JobListClient() {
     if (filterLocation && j.location !== filterLocation) return false;
     if (!search) return true;
     const q = search.toLowerCase();
-    return j.title.toLowerCase().includes(q) || j.company.toLowerCase().includes(q) || j.description.toLowerCase().includes(q);
+
+    // Search across all text fields
+    const haystack = [
+      j.title, j.company, j.description, j.requirements,
+      j.location, ...(j.tags || []),
+    ].join(" ").toLowerCase();
+
+    // Direct match
+    if (haystack.includes(q)) return true;
+
+    // Synonym/related terms matching
+    const synonyms: Record<string, string[]> = {
+      software: ["backend", "frontend", "fullstack", "developer", "engineer", "dev", "programador", "desarrollo"],
+      desarrollo: ["backend", "frontend", "fullstack", "developer", "engineer", "software", "programador"],
+      programador: ["developer", "engineer", "software", "desarrollo", "backend", "frontend"],
+      developer: ["engineer", "software", "desarrollo", "programador", "dev"],
+      diseño: ["design", "designer", "figma", "ui", "ux"],
+      design: ["diseño", "designer", "figma", "ui", "ux"],
+      remoto: ["remote", "100% remoto"],
+      remote: ["remoto", "100% remoto"],
+      marketing: ["growth", "ads", "publicidad", "seo", "sem"],
+      data: ["analytics", "datos", "bi", "dashboard", "sql"],
+      devops: ["cloud", "aws", "gcp", "azure", "infra", "sre", "docker", "kubernetes"],
+      mobile: ["android", "ios", "react native", "flutter", "móvil"],
+    };
+
+    const related = synonyms[q] || [];
+    return related.some((term) => haystack.includes(term));
   });
 
   return (
