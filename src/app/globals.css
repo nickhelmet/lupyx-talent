@@ -25,6 +25,11 @@
   --foreground: #0B1F3B;
 }
 
+.dark {
+  --background: #0a0f1a;
+  --foreground: #e5e7eb;
+}
+
 html {
   scroll-behavior: smooth;
 }

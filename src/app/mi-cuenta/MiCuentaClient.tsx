@@ -91,12 +91,12 @@ export default function MiCuentaClient() {
   const completedSteps = steps.filter((s) => s.done).length;
 
   if (loading) {
-    return <div className="flex min-h-[60vh] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-[#2EC4B6] border-t-transparent" /></div>;
+    return <div className="flex min-h-[60vh] items-center justify-center bg-white dark:bg-[#0a0f1a]"><div className="h-8 w-8 animate-spin rounded-full border-2 border-[#2EC4B6] border-t-transparent" /></div>;
   }
 
   if (!user) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 bg-white px-4 dark:bg-[#0a0f1a]">
         <img src="/logo.jpg" alt="Lupyx Talent" className="h-16" />
         <p className="text-lg text-[#0B1F3B] dark:text-white">Iniciá sesión para ver tu cuenta</p>
         <button onClick={loginWithGoogle} className="cursor-pointer rounded-full bg-[#2EC4B6] px-8 py-3 font-semibold text-white hover:bg-[#26a89c]">Iniciar sesión con Google</button>

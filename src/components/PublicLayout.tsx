@@ -6,7 +6,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
   return (
     <>
       <Header />
-      <main id="main-content" className="flex-1">
+      <main id="main-content" className="flex-1 bg-white dark:bg-[#0a0f1a]">
         <PageTransition>{children}</PageTransition>
       </main>
       <Footer />
