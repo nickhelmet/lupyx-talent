@@ -37,7 +37,7 @@ export default function NosotrosClient() {
       </section>
 
       {/* Values */}
-      <section className="py-20">
+      <section className="bg-white py-20 dark:bg-[#0a0f1a]">
         <div className="mx-auto max-w-5xl px-4">
           <h2 className="text-center text-2xl font-bold text-[#0B1F3B] dark:text-white sm:text-3xl">Nuestros valores</h2>
           <div className="mt-12 grid gap-6 sm:grid-cols-2">
@@ -90,7 +90,7 @@ export default function NosotrosClient() {
       </section>
 
       {/* Stats */}
-      <section className="py-20">
+      <section className="bg-white py-20 dark:bg-[#0a0f1a]">
         <div className="mx-auto max-w-5xl px-4">
           <div className="grid gap-8 text-center sm:grid-cols-3">
             <div>
