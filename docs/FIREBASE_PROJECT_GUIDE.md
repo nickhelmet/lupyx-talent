@@ -1272,6 +1272,89 @@ El frontend llama a la función, recibe la URL temporal, y abre en nueva tab.
 - **Enum labels:** mapear enums de Firestore (`UNIVERSITY`) a labels legibles (`Universitario`) con objetos de traducción en el frontend.
 - **Navegación:** usar `next/link` o `router.push` en SPA. Nunca `<a href>` que causa full page reload y pierde auth state.
 
+### Talent pool (candidates separate from applications)
+
+Recruitment platforms often need two separate collections:
+- **applications/**: linked to a specific job, submitted by users through a form
+- **candidates/**: a reusable talent database managed by admins, independent of any job posting
+
+```
+candidates/{candidateId}
+  ├── firstName, lastName, email, phone, city
+  ├── skills: string[]          // ["React", "Node.js", "Python"]
+  ├── tags: string[]            // ["senior", "urgente", "frontend"]
+  ├── notes: string             // Free-text admin notes
+  ├── source: string            // "manual" | "linkedin" | "referral" | "import" | "website"
+  ├── cvPath, cvAnalysis        // Optional CV storage + AI analysis
+  ├── matchHistory: []          // Future: which jobs they were matched to
+  ├── createdBy, createdAt, updatedAt
+```
+
+**Key differences from applications:**
+- Candidates don't belong to a job — they're a pool to search and match
+- Only admins can CRUD candidates (no public-facing form)
+- Tags enable flexible categorization without rigid enums
+- Source tracking helps measure where talent comes from
+- Skills array enables keyword search across the pool
+
+**Admin UI pattern:** list with search + tag filters + add form (toggle visibility) + delete with confirmation. Use the same card-based layout as applications for consistency.
+
+### Delete with storage cleanup (audit pattern)
+
+When deleting records that have associated files in Storage:
+
+```typescript
+// 1. Read the document to find file references
+const doc = await db.doc(`collection/${id}`).get();
+const filePath = doc.data()?.cvPath;
+
+// 2. Delete the file from Storage (ignore if missing)
+if (filePath) {
+  try {
+    await getStorage().bucket().file(filePath).delete();
+  } catch { /* file may already be deleted */ }
+}
+
+// 3. Delete the Firestore document
+await db.doc(`collection/${id}`).delete();
+
+// 4. Audit log
+console.log(`Record ${id} deleted by ${user.email}`);
+```
+
+**Best practices:**
+- Always delete files BEFORE the document (if doc delete fails, orphaned files are cheaper than orphaned references)
+- Catch storage errors silently — the file may not exist or may have been manually deleted
+- Log who deleted what for audit trail (Cloud Functions logs are retained 30 days by default)
+- Use `confirm()` in the frontend before any delete operation
+- Sanitize IDs server-side: `id.replace(/[^a-zA-Z0-9_-]/g, "")` to prevent path traversal
+
+### Vendor lock-in mitigation
+
+When building on Firebase, consider these portability strategies:
+
+**What ports easily:**
+- React components, Tailwind CSS, business logic — 100% reusable
+- REST API patterns — Cloud Functions ↔ Express/Fastify is mostly wrapping
+- File upload/download — S3-compatible APIs are universal
+
+**What requires rewriting:**
+- Firestore queries → SQL (Prisma/Drizzle) — schema redesign needed
+- Firebase Auth → Auth.js/Supabase Auth — hook rewrite
+- Firestore rules → server-side middleware
+- Real-time listeners → WebSockets or polling
+
+**Common migration targets:**
+| Firebase | Alternative | Effort |
+|----------|------------|--------|
+| Hosting | Vercel | Low (Next.js native) |
+| Cloud Functions | Render/Railway (Node.js) | Medium |
+| Firestore | PostgreSQL (Render/Supabase) | High |
+| Auth | Auth.js / Supabase Auth | Medium |
+| Storage | Cloudflare R2 / Supabase Storage | Low |
+
+**Tip:** keep business logic in pure functions separate from Firebase SDK calls. This makes the logic testable without Firebase and portable to any backend.
+
 ---
 
 *Última actualización: Abril 2026 — basada en implementación de Lupyx Talent*
