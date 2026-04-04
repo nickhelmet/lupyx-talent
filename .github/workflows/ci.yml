@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  lint-and-typecheck:
+  lint-typecheck:
     name: Lint & Type Check
     runs-on: ubuntu-latest
     steps:
@@ -19,13 +19,42 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npx tsc --noEmit
-      - run: npm test
-      - name: Type check and test Cloud Functions
-        run: cd functions && npm ci && npx tsc --noEmit && npx vitest run
+      - name: Type check Cloud Functions
+        run: cd functions && npm ci && npx tsc --noEmit
+
+  test-frontend:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx vitest run --reporter=verbose
+      - name: Test summary
+        if: always()
+        run: echo "Frontend tests completed"
+
+  test-functions:
+    name: Cloud Functions Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: cd functions && npm ci
+      - run: cd functions && npx vitest run --reporter=verbose
+      - name: Test summary
+        if: always()
+        run: echo "Functions tests completed"
 
   build:
     name: Build
-    needs: lint-and-typecheck
+    needs: [lint-typecheck, test-frontend, test-functions]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -42,6 +71,8 @@ jobs:
           NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: dummy.appspot.com
           NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "000000000"
           NEXT_PUBLIC_FIREBASE_APP_ID: "1:000:web:dummy"
+      - name: Build Cloud Functions
+        run: cd functions && npm ci && npm run build
 
   deploy:
     name: Deploy to Firebase
