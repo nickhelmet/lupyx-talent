@@ -64,13 +64,15 @@ export default function MiCuentaClient() {
     setSaving(true);
     const form = new FormData(e.currentTarget);
     try {
-      await updateProfile({
-        phone: form.get("phone"),
-        city: form.get("city"),
-        dni: form.get("dni"),
-        birthDate: form.get("birthDate"),
-        educationLevel: form.get("educationLevel"),
-      });
+      const updated = {
+        phone: form.get("phone") as string,
+        city: form.get("city") as string,
+        dni: form.get("dni") as string,
+        birthDate: form.get("birthDate") as string,
+        educationLevel: form.get("educationLevel") as string,
+      };
+      await updateProfile(updated);
+      setProfile((prev) => ({ ...prev, ...updated }));
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch { /* ignore */ } finally {
@@ -78,12 +80,13 @@ export default function MiCuentaClient() {
     }
   }
 
-  // Onboarding progress
+  // Onboarding progress (only computed after profile loads)
+  const profileComplete = !profileLoading && !!(profile.phone && profile.city);
   const steps = [
     { label: "Crear cuenta", done: true },
-    { label: "Completar perfil", done: !!(profile.phone && profile.city) },
-    { label: "Explorar búsquedas", done: true }, // if they're here, they've seen the site
-    { label: "Postularse", done: apps.length > 0 },
+    { label: "Completar perfil", done: profileComplete },
+    { label: "Explorar búsquedas", done: true },
+    { label: "Postularse", done: !appsLoading && apps.length > 0 },
   ];
   const completedSteps = steps.filter((s) => s.done).length;
 
