@@ -22,6 +22,8 @@ export { getAllowlist, addAllowlistEmail, removeAllowlistEmail } from "./adminAl
 export { addComment, getApplicationDetail } from "./adminComments";
 export { analyzeCv } from "./cvAnalysis";
 export { downloadCv } from "./downloadCv";
+export { deleteApplication } from "./adminDelete";
+export { listCandidates, addCandidate, deleteCandidate } from "./candidates";
 
 // SEO
 export { sitemap } from "./sitemap";

@@ -183,6 +183,25 @@ export interface Notification {
   createdAt: string;
 }
 
+export interface Candidate {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email?: string | null;
+  phone?: string | null;
+  city?: string | null;
+  skills: string[];
+  notes?: string | null;
+  tags: string[];
+  source: string;
+  cvPath?: string | null;
+  cvAnalysis?: unknown;
+  matchHistory: unknown[];
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AllowlistConfig {
   admin_emails: string[];
   blocked_emails: string[];
