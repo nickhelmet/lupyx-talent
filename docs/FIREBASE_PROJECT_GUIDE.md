@@ -460,6 +460,41 @@ Firestore es NoSQL — no tiene JOINs ni queries SQL. Para compensar:
 
 Documentar todos los índices compuestos del proyecto en `ARCHITECTURE.md` para que cualquier dev pueda recrearlos.
 
+### Índices compuestos — guía detallada
+
+Un **índice compuesto** es un índice que cubre queries con más de un campo. Firestore crea índices automáticos para queries de un solo campo (`where("status", "==", "ACTIVE")` o `orderBy("createdAt")`), pero cuando combinás campos en una query necesitás crearlo manualmente.
+
+**Cuándo se necesita:**
+```
+// NO necesita índice — un solo campo
+db.collection("jobs").where("status", "==", "ACTIVE")
+db.collection("jobs").orderBy("createdAt", "desc")
+
+// SÍ necesita índice — combina where + orderBy en campos distintos
+db.collection("jobs").where("status", "==", "ACTIVE").orderBy("postedDate", "desc")
+db.collection("applications").where("email", "==", x).orderBy("appliedAt", "desc")
+```
+
+**Cómo detectar que falta uno:** la Cloud Function falla con `FAILED_PRECONDITION: The query requires an index` e incluye un link directo para crearlo.
+
+**Cómo crear:**
+```bash
+# Opción 1: Link del error → click en Firebase Console
+
+# Opción 2: CLI
+gcloud firestore indexes composite create --project=PROJECT \
+  --collection-group=COLLECTION \
+  --field-config field-path=CAMPO1,order=ascending \
+  --field-config field-path=CAMPO2,order=descending
+
+# Verificar estado (tarda 2-5 minutos)
+gcloud firestore indexes composite list --project=PROJECT
+```
+
+**Regla:** cada vez que escribas una query compuesta en una Cloud Function, verificá si necesita índice. Si falla en producción, el error incluye el link para crearlo — pero es mejor crearlos proactivamente.
+
+**Costo:** los índices compuestos son gratuitos en Firestore. Solo consumen espacio de almacenamiento (mínimo).
+
 ---
 
 ## Firebase Storage
