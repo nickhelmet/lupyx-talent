@@ -92,6 +92,7 @@ export default function AdminApplications() {
   const [commentText, setCommentText] = useState("");
   const [commentInternal, setCommentInternal] = useState(false);
   const [sending, setSending] = useState(false);
+  const [jobSlugs, setJobSlugs] = useState<Record<string, string>>({});
   const [analyzing, setAnalyzing] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const perPage = 10;
@@ -100,8 +101,16 @@ export default function AdminApplications() {
   async function loadApps() {
     try {
       setError(null);
-      const data = await adminFetch("adminListApplications");
+      const [data, jobs] = await Promise.all([
+        adminFetch("adminListApplications"),
+        adminFetch("adminListJobs").catch(() => []),
+      ]);
       setApps(data);
+      const slugMap: Record<string, string> = {};
+      (jobs as Array<{ title: string; slug: string; id: string }>).forEach((j) => {
+        slugMap[j.title.toLowerCase()] = j.slug || j.id;
+      });
+      setJobSlugs(slugMap);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error loading applications");
     } finally {
@@ -322,16 +331,18 @@ export default function AdminApplications() {
                 {/* Status timeline */}
                 {app.statusHistory && app.statusHistory.length > 0 && (
                   <div className="mt-4">
-                    <p className="text-xs font-semibold text-[#1F4E79]/50 dark:text-gray-500">Historial</p>
-                    <div className="mt-2 space-y-2">
+                    <p className="text-xs font-semibold text-[#1F4E79]/50 dark:text-gray-500">Historial de cambios</p>
+                    <div className="relative mt-2 ml-3 space-y-3 border-l-2 border-gray-200 pl-4 dark:border-white/10">
                       {app.statusHistory.map((evt, i) => (
-                        <div key={i} className="flex items-center gap-2 text-xs text-[#1F4E79]/60 dark:text-gray-500">
-                          <div className={`h-2 w-2 rounded-full ${statusColors[evt.to] || "bg-gray-400"}`} />
-                          <span>{statusLabels[evt.from] || evt.from} → <strong className="text-[#0B1F3B] dark:text-white">{statusLabels[evt.to] || evt.to}</strong></span>
-                          <span className="text-[#1F4E79]/40">·</span>
-                          <span>{evt.changedBy?.split("@")[0]}</span>
-                          <span className="text-[#1F4E79]/40">·</span>
-                          <span>{new Date(evt.changedAt).toLocaleDateString("es-AR")}</span>
+                        <div key={i} className="relative">
+                          <div className={`absolute -left-[1.35rem] top-0.5 h-3 w-3 rounded-full border-2 border-white dark:border-[#0d1520] ${statusColors[evt.to] || "bg-gray-400"}`} />
+                          <p className="text-xs">
+                            <span className="font-medium text-[#0B1F3B] dark:text-white">{statusLabels[evt.to] || evt.to}</span>
+                            <span className="text-[#1F4E79]/40"> ← {statusLabels[evt.from] || evt.from}</span>
+                          </p>
+                          <p className="text-[10px] text-[#1F4E79]/40 dark:text-gray-600">
+                            {evt.changedBy?.split("@")[0]} · {new Date(evt.changedAt).toLocaleDateString("es-AR")} {new Date(evt.changedAt).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
+                          </p>
                         </div>
                       ))}
                     </div>
@@ -562,7 +573,7 @@ export default function AdminApplications() {
                         <div>
                           <p className="text-xs text-[#1F4E79]/50">Podría encajar mejor en:</p>
                           {app.cvAnalysis.better_fit_jobs.map((j: { job_title: string; reason: string }, i: number) => {
-                            const slug = j.job_title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+                            const slug = jobSlugs[j.job_title.toLowerCase()] || j.job_title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
                             return (
                               <div key={i} className="mt-1">
                                 <a href={`/busquedas/${slug}/`} className="text-xs font-semibold text-[#2EC4B6] hover:underline">→ {j.job_title}</a>
