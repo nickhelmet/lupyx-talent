@@ -40,3 +40,9 @@ body {
   background-color: #2EC4B6;
   color: #ffffff;
 }
+
+/* Fix select/option dark mode — browsers ignore Tailwind classes on <option> */
+.dark select option {
+  background-color: #0d1520;
+  color: #e5e7eb;
+}
