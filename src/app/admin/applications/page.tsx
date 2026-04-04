@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Loader2, MessageSquare, ChevronDown, ChevronUp, Send, Sparkles, Download, Trash2 } from "lucide-react";
+import { Search, Loader2, MessageSquare, ChevronDown, ChevronUp, Send, Sparkles, Download, Trash2, LayoutGrid, List } from "lucide-react";
+import KanbanBoard from "./KanbanBoard";
 import { adminFetch } from "@/services/adminApi";
 import Pagination from "@/components/Pagination";
 import { timeAgo } from "@/lib/utils";
@@ -97,6 +98,7 @@ export default function AdminApplications() {
   const [page, setPage] = useState(1);
   const perPage = 10;
   const [interviewForm, setInterviewForm] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "kanban">("kanban");
 
   async function loadApps() {
     try {
@@ -220,6 +222,22 @@ export default function AdminApplications() {
           />
         </div>
         <span className="text-sm text-[#1F4E79]/60 dark:text-gray-400">{filtered.length} postulaciones</span>
+
+        {/* View toggle */}
+        <div className="flex rounded-lg border border-gray-200 dark:border-white/10">
+          <button
+            onClick={() => setViewMode("kanban")}
+            className={`flex items-center gap-1 rounded-l-lg px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === "kanban" ? "bg-[#2EC4B6] text-white" : "text-[#1F4E79]/60 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5"}`}
+          >
+            <LayoutGrid className="h-3.5 w-3.5" /> Kanban
+          </button>
+          <button
+            onClick={() => setViewMode("list")}
+            className={`flex items-center gap-1 rounded-r-lg px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === "list" ? "bg-[#2EC4B6] text-white" : "text-[#1F4E79]/60 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5"}`}
+          >
+            <List className="h-3.5 w-3.5" /> Lista
+          </button>
+        </div>
       </div>
 
       {/* Status quick filters */}
@@ -283,6 +301,20 @@ export default function AdminApplications() {
         <div className="mt-4 rounded-xl bg-red-50 p-4 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">{error}</div>
       )}
 
+      {/* Kanban view */}
+      {viewMode === "kanban" && (
+        <div className="mt-6">
+          <KanbanBoard
+            apps={apps}
+            filterJob={filterJob}
+            onStatusChange={updateStatus}
+            onCardClick={(appId) => { setViewMode("list"); setExpanded(appId); }}
+          />
+        </div>
+      )}
+
+      {/* List view */}
+      {viewMode === "list" && (<>
       <div className="mt-6 space-y-3">
         {filtered.length === 0 && (
           <p className="py-8 text-center text-sm text-[#1F4E79]/50 dark:text-gray-500">
@@ -680,6 +712,7 @@ export default function AdminApplications() {
       </div>
 
       <Pagination total={filtered.length} page={page} perPage={perPage} onPageChange={setPage} />
+      </>)}
     </div>
   );
 }
