@@ -83,6 +83,18 @@ export default function Header() {
 
           {/* Mobile Menu Button */}
           <div className="flex items-center gap-2 md:hidden">
+            {authLoading ? (
+              <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200 dark:bg-white/10" />
+            ) : user ? (
+              <UserMenu />
+            ) : (
+              <button
+                onClick={loginWithGoogle}
+                className="cursor-pointer rounded-full bg-[#2EC4B6] px-3 py-1.5 text-xs font-semibold text-white"
+              >
+                Login
+              </button>
+            )}
             <ThemeToggle />
             <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

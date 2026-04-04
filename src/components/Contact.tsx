@@ -46,7 +46,7 @@ const contactLinks = [
 
 export default function Contact() {
   return (
-    <section id="contacto" className="py-20 sm:py-28">
+    <section id="contacto" className="bg-white py-20 dark:bg-[#0a0f1a] sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
