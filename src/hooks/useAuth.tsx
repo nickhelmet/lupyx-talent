@@ -20,6 +20,7 @@ import { track } from "@/lib/analytics";
 interface AuthCtx {
   user: User | null;
   loading: boolean;
+  isAdmin: boolean;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -27,6 +28,7 @@ interface AuthCtx {
 const AuthContext = createContext<AuthCtx>({
   user: null,
   loading: true,
+  isAdmin: false,
   loginWithGoogle: async () => {},
   logout: async () => {},
 });
@@ -34,12 +36,27 @@ const AuthContext = createContext<AuthCtx>({
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const auth = getFirebaseAuth();
     return onAuthStateChanged(auth, (u) => {
       setUser(u);
       setLoading(false);
+      setIsAdmin(false);
+      if (u) {
+        // Check admin status (non-blocking)
+        u.getIdToken().then((token) => {
+          const apiBase = process.env.NEXT_PUBLIC_USE_EMULATORS === "true"
+            ? "http://localhost:5001/lupyx-talent/us-central1"
+            : "https://us-central1-lupyx-talent.cloudfunctions.net";
+          fetch(`${apiBase}/adminDashboard`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }).then((res) => {
+            setIsAdmin(res.ok);
+          }).catch(() => setIsAdmin(false));
+        }).catch(() => {});
+      }
     });
   }, []);
 
@@ -85,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );

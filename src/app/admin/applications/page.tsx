@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Loader2, MessageSquare, ChevronDown, ChevronUp, Send, Sparkles, Download, Trash2, LayoutGrid, List } from "lucide-react";
+import { Search, Loader2, MessageSquare, ChevronDown, ChevronUp, Send, Sparkles, Download, Trash2, LayoutGrid, List, XCircle } from "lucide-react";
 import KanbanBoard from "./KanbanBoard";
 import { adminFetch } from "@/services/adminApi";
+import { swrFetch, setCache, invalidateCache } from "@/lib/swrCache";
 import Pagination from "@/components/Pagination";
 import { timeAgo } from "@/lib/utils";
 import { SkeletonList } from "@/components/Skeleton";
@@ -110,15 +111,25 @@ export default function AdminApplications() {
   async function loadApps() {
     try {
       setError(null);
-      const [data, jobs] = await Promise.all([
+      const fetchApps = () => Promise.all([
         adminFetch("adminListApplications"),
         adminFetch("adminListJobs").catch(() => []),
       ]);
+
+      const [data, jobs] = await swrFetch(
+        "adminListApplications",
+        fetchApps,
+        ([freshData, freshJobs]: [AppWithComments[], Array<{ title: string; slug: string; id: string }>]) => {
+          setApps(freshData);
+          const slugMap: Record<string, string> = {};
+          freshJobs.forEach((j) => { slugMap[j.title.toLowerCase()] = j.slug || j.id; });
+          setJobSlugs(slugMap);
+        },
+      ) as [AppWithComments[], Array<{ title: string; slug: string; id: string }>];
+
       setApps(data);
       const slugMap: Record<string, string> = {};
-      (jobs as Array<{ title: string; slug: string; id: string }>).forEach((j) => {
-        slugMap[j.title.toLowerCase()] = j.slug || j.id;
-      });
+      jobs.forEach((j: { title: string; slug: string; id: string }) => { slugMap[j.title.toLowerCase()] = j.slug || j.id; });
       setJobSlugs(slugMap);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error loading applications");
@@ -132,14 +143,20 @@ export default function AdminApplications() {
     return () => clearTimeout(timer);
   }, []);
 
+  const [showShortcuts, setShowShortcuts] = useState(false);
+
+  // Optimistic status update
   async function updateStatus(appId: string, status: string) {
+    const prev = [...apps];
+    setApps(apps.map((a) => a.id === appId ? { ...a, status: status as AppWithComments["status"] } : a));
     try {
       await adminFetch("updateApplicationStatus", {
         method: "POST",
         body: JSON.stringify({ applicationId: appId, status }),
       });
-      await loadApps();
+      invalidateCache("adminListApplications");
     } catch (e) {
+      setApps(prev);
       setError(e instanceof Error ? e.message : "Error");
     }
   }
@@ -159,39 +176,75 @@ export default function AdminApplications() {
     }
   }
 
+  // Optimistic comment
   async function sendComment(appId: string) {
     if (!commentText.trim()) return;
-    setSending(true);
+    const text = commentText;
+    const isInternal = commentInternal;
+    const optimisticComment: Comment = { text, isInternal, author: "Yo", createdAt: new Date().toISOString() };
+
+    setApps(apps.map((a) => a.id === appId ? { ...a, comments: [...(a.comments || []), optimisticComment] } : a));
+    setCommentText("");
+    setCommentInternal(false);
+
     try {
       await adminFetch("addComment", {
         method: "POST",
-        body: JSON.stringify({ applicationId: appId, text: commentText, isInternal: commentInternal }),
+        body: JSON.stringify({ applicationId: appId, text, isInternal }),
       });
-      setCommentText("");
-      setCommentInternal(false);
-      await loadApps();
+      invalidateCache("adminListApplications");
     } catch (e) {
+      setApps(apps); // revert
       setError(e instanceof Error ? e.message : "Error");
-    } finally {
-      setSending(false);
     }
   }
 
   const [deletingApp, setDeletingApp] = useState<string | null>(null);
+  const [rejectingApp, setRejectingApp] = useState<string | null>(null);
 
+  const rejectReasons = [
+    "No cumple requisitos técnicos",
+    "Experiencia insuficiente",
+    "Pretensión salarial fuera de rango",
+    "No disponible en las fechas requeridas",
+    "Perfil no alineado con cultura",
+  ];
+
+  async function quickReject(appId: string, reason: string) {
+    setRejectingApp(null);
+    const prev = [...apps];
+    setApps(apps.map((a) => a.id === appId ? { ...a, status: "REJECTED" as AppWithComments["status"] } : a));
+    try {
+      await adminFetch("updateApplicationStatus", {
+        method: "POST",
+        body: JSON.stringify({ applicationId: appId, status: "REJECTED" }),
+      });
+      await adminFetch("addComment", {
+        method: "POST",
+        body: JSON.stringify({ applicationId: appId, text: `Rechazado: ${reason}`, isInternal: true }),
+      });
+      invalidateCache("adminListApplications");
+    } catch (e) {
+      setApps(prev);
+      setError(e instanceof Error ? e.message : "Error");
+    }
+  }
+
+  // Optimistic delete
   async function deleteApp(appId: string, name: string) {
     if (!confirm(`¿Eliminar la postulación de "${name}"? Se eliminará también el CV. Esta acción no se puede deshacer.`)) return;
-    setDeletingApp(appId);
+    const prev = [...apps];
+    setApps(apps.filter((a) => a.id !== appId));
+    setExpanded(null);
     try {
       await adminFetch("deleteApplication", {
         method: "POST",
         body: JSON.stringify({ applicationId: appId }),
       });
-      await loadApps();
+      invalidateCache("adminListApplications");
     } catch (e) {
+      setApps(prev);
       setError(e instanceof Error ? e.message : "Error deleting application");
-    } finally {
-      setDeletingApp(null);
     }
   }
 
@@ -212,6 +265,43 @@ export default function AdminApplications() {
 
   const paginated = filtered.slice((page - 1) * perPage, page * perPage);
 
+  // Keyboard shortcuts (#256)
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
+      const currentIndex = expanded ? filtered.findIndex((a) => a.id === expanded) : -1;
+      switch (e.key) {
+        case "j":
+          if (currentIndex < filtered.length - 1) setExpanded(filtered[currentIndex + 1].id);
+          else if (currentIndex === -1 && filtered.length > 0) setExpanded(filtered[0].id);
+          break;
+        case "k":
+          if (currentIndex > 0) setExpanded(filtered[currentIndex - 1].id);
+          break;
+        case "e":
+          if (expanded) setExpanded(null);
+          else if (filtered.length > 0) setExpanded(filtered[0].id);
+          break;
+        case "v":
+          setViewMode((v) => v === "kanban" ? "list" : "kanban");
+          break;
+        case "/":
+          e.preventDefault();
+          (document.querySelector("[data-search-input]") as HTMLInputElement)?.focus();
+          break;
+        case "?":
+          setShowShortcuts((s) => !s);
+          break;
+        case "Escape":
+          setShowShortcuts(false);
+          setRejectingApp(null);
+          break;
+      }
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [expanded, filtered, viewMode]);
+
   if (loading) {
     return <SkeletonList count={5} />;
   }
@@ -224,7 +314,8 @@ export default function AdminApplications() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nombre, email, puesto..."
+            data-search-input
+            placeholder="Buscar por nombre, email, puesto... (/ para enfocar)"
             className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-[#2EC4B6] dark:border-white/10 dark:bg-white/5 dark:text-white"
           />
         </div>
@@ -351,16 +442,42 @@ export default function AdminApplications() {
                   {app.appliedAt && <span className="text-[#1F4E79]/40 dark:text-gray-600"> · {timeAgo(app.appliedAt as string)}</span>}
                 </p>
               </div>
-              <select
-                value={app.status}
-                onClick={(e) => e.stopPropagation()}
-                onChange={(e) => updateStatus(app.id, e.target.value)}
-                className={`cursor-pointer rounded-full px-3 py-1 text-xs font-semibold outline-none ${statusStyles[app.status] || ""}`}
-              >
-                {statusFlow.map((s) => (
-                  <option key={s} value={s}>{statusLabels[s]}</option>
-                ))}
-              </select>
+              <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                {app.status !== "REJECTED" && app.status !== "HIRED" && (
+                  <div className="relative">
+                    <button
+                      onClick={() => setRejectingApp(rejectingApp === app.id ? null : app.id)}
+                      className="flex items-center gap-1 rounded-full border border-red-200 px-2 py-1 text-[10px] font-medium text-red-400 hover:bg-red-50 hover:text-red-600 dark:border-red-800 dark:hover:bg-red-900/20"
+                      title="Rechazo rápido"
+                    >
+                      <XCircle className="h-3 w-3" />
+                    </button>
+                    {rejectingApp === app.id && (
+                      <div className="absolute right-0 top-8 z-20 w-56 rounded-xl border border-gray-200 bg-white py-1 shadow-lg dark:border-white/10 dark:bg-[#0d1520]">
+                        <p className="px-3 py-1.5 text-[10px] font-semibold text-[#1F4E79]/50 dark:text-gray-500">Motivo de rechazo</p>
+                        {rejectReasons.map((reason) => (
+                          <button
+                            key={reason}
+                            onClick={() => quickReject(app.id, reason)}
+                            className="w-full px-3 py-2 text-left text-xs text-[#0B1F3B] hover:bg-red-50 dark:text-gray-300 dark:hover:bg-red-900/20"
+                          >
+                            {reason}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                <select
+                  value={app.status}
+                  onChange={(e) => updateStatus(app.id, e.target.value)}
+                  className={`cursor-pointer rounded-full px-3 py-1 text-xs font-semibold outline-none ${statusStyles[app.status] || ""}`}
+                >
+                  {statusFlow.map((s) => (
+                    <option key={s} value={s}>{statusLabels[s]}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* Expanded detail */}
@@ -735,6 +852,31 @@ export default function AdminApplications() {
 
       <Pagination total={filtered.length} page={page} perPage={perPage} onPageChange={setPage} />
       </>)}
+
+      {/* Keyboard shortcuts help */}
+      {showShortcuts && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowShortcuts(false)}>
+          <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-[#0d1520]" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-[#0B1F3B] dark:text-white">Atajos de teclado</h3>
+            <div className="mt-4 space-y-2">
+              {[
+                ["J", "Siguiente candidato"],
+                ["K", "Anterior candidato"],
+                ["E", "Expandir / colapsar"],
+                ["V", "Toggle Kanban / Lista"],
+                ["/", "Enfocar búsqueda"],
+                ["Esc", "Cerrar"],
+                ["?", "Mostrar esta ayuda"],
+              ].map(([key, desc]) => (
+                <div key={key} className="flex items-center justify-between">
+                  <span className="text-sm text-[#1F4E79]/70 dark:text-gray-400">{desc}</span>
+                  <kbd className="rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-mono font-bold text-[#0B1F3B] dark:border-white/10 dark:bg-white/5 dark:text-white">{key}</kbd>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

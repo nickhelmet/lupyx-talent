@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Briefcase, FileText, Users, Clock, TrendingUp } from "lucide-react";
+import { Briefcase, FileText, Users, Clock, TrendingUp, Activity } from "lucide-react";
 import Link from "next/link";
 import { SkeletonGrid, SkeletonList } from "@/components/Skeleton";
 import { adminFetch } from "@/services/adminApi";
+import { timeAgo } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import type { Application } from "@/types";
 
@@ -66,6 +67,52 @@ export default function AdminDashboard() {
   recentApps.forEach((a) => {
     statusDist[a.status] = (statusDist[a.status] || 0) + 1;
   });
+
+  // Activity feed — build from applications data
+  interface ActivityEvent {
+    type: "application" | "status_change" | "comment";
+    text: string;
+    time: string;
+    icon: string;
+  }
+  const activityFeed: ActivityEvent[] = [];
+  const allApps = recentApps as Array<Application & { statusHistory?: Array<{ from: string; to: string; changedBy: string; changedAt: string }>; comments?: Array<{ text: string; author: string; createdAt: string; isInternal: boolean }> }>;
+
+  allApps.forEach((app) => {
+    // New application
+    if (app.appliedAt) {
+      const ts = typeof app.appliedAt === "object" && "_seconds" in (app.appliedAt as Record<string, unknown>)
+        ? new Date(((app.appliedAt as Record<string, number>)._seconds) * 1000).toISOString()
+        : app.appliedAt as string;
+      activityFeed.push({
+        type: "application",
+        text: `${app.firstName} ${app.lastName} se postuló a ${app.jobTitle}`,
+        time: ts,
+        icon: "🆕",
+      });
+    }
+    // Status changes
+    (app.statusHistory || []).forEach((evt) => {
+      activityFeed.push({
+        type: "status_change",
+        text: `${app.firstName} ${app.lastName} → ${statusLabels[evt.to] || evt.to} (${app.jobTitle})`,
+        time: evt.changedAt,
+        icon: "🔄",
+      });
+    });
+    // Comments
+    (app.comments || []).forEach((c) => {
+      activityFeed.push({
+        type: "comment",
+        text: `${c.author?.split("@")[0] || "Admin"} comentó en ${app.firstName} ${app.lastName}`,
+        time: c.createdAt,
+        icon: "💬",
+      });
+    });
+  });
+
+  activityFeed.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+  const recentActivity = activityFeed.slice(0, 10);
 
   const cards = [
     { label: "Búsquedas activas", value: stats?.activeJobs ?? 0, icon: Briefcase, color: "text-[#2EC4B6]", bg: "bg-[#2EC4B6]/10", href: "/admin/jobs" },
@@ -193,6 +240,26 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+      {/* Activity feed */}
+      {recentActivity.length > 0 && (
+        <div className="mt-8 rounded-2xl border border-gray-100 bg-white p-6 dark:border-white/10 dark:bg-white/5">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-[#0B1F3B] dark:text-white">
+            <Activity className="h-4 w-4 text-[#2EC4B6]" /> Actividad reciente
+          </h2>
+          <div className="mt-4 space-y-3">
+            {recentActivity.map((evt, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <span className="mt-0.5 text-sm">{evt.icon}</span>
+                <div className="flex-1">
+                  <p className="text-sm text-[#0B1F3B] dark:text-gray-200">{evt.text}</p>
+                  <p className="text-[10px] text-[#1F4E79]/40 dark:text-gray-600">{timeAgo(evt.time)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       </>)}
     </div>
   );

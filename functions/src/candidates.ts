@@ -5,6 +5,10 @@ import { verifyAuth } from "./authMiddleware";
 import { rateLimit } from "./rateLimiter";
 import { sanitizeString, validateEmail, validatePhone } from "./validation";
 
+// In-memory cache for enriched candidates (avoids N+1 queries on every request)
+let candidatesCache: { data: unknown[]; ts: number } | null = null;
+const CANDIDATES_CACHE_TTL = 30_000; // 30 seconds
+
 export const listCandidates = onRequest({ maxInstances: 1 }, async (req, res) => {
   const cors = getCorsHeaders(req.headers.origin ?? null);
   Object.entries(cors).forEach(([k, v]) => res.set(k, v));
@@ -14,61 +18,81 @@ export const listCandidates = onRequest({ maxInstances: 1 }, async (req, res) =>
   const user = await verifyAuth(req);
   if (!user?.isAdmin) { res.status(403).json({ error: "Forbidden" }); return; }
 
+  // Return cached if fresh
+  if (candidatesCache && Date.now() - candidatesCache.ts < CANDIDATES_CACHE_TTL) {
+    res.status(200).json(candidatesCache.data);
+    return;
+  }
+
   const db = getFirestore();
   const snapshot = await db.collection("candidates").orderBy("createdAt", "desc").limit(200).get();
 
-  // Enrich candidates with their application data
-  const candidates = await Promise.all(snapshot.docs.map(async (doc) => {
+  // Batch-fetch all applications and users to avoid N+1
+  const emails = snapshot.docs
+    .map((doc) => doc.data().email as string | null)
+    .filter((e): e is string => !!e);
+  const uniqueEmails = [...new Set(emails)];
+
+  // Fetch all applications for all candidate emails in one batch (max 30 per "in" query)
+  const appsByEmail = new Map<string, FirebaseFirestore.QueryDocumentSnapshot[]>();
+  for (let i = 0; i < uniqueEmails.length; i += 30) {
+    const batch = uniqueEmails.slice(i, i + 30);
+    const appsSnap = await db.collection("applications")
+      .where("email", "in", batch)
+      .orderBy("appliedAt", "desc")
+      .get();
+    appsSnap.docs.forEach((doc) => {
+      const email = doc.data().email as string;
+      if (!appsByEmail.has(email)) appsByEmail.set(email, []);
+      appsByEmail.get(email)!.push(doc);
+    });
+  }
+
+  // Fetch all user profiles in one batch
+  const profilesByEmail = new Map<string, FirebaseFirestore.DocumentData>();
+  for (let i = 0; i < uniqueEmails.length; i += 30) {
+    const batch = uniqueEmails.slice(i, i + 30);
+    const usersSnap = await db.collection("users")
+      .where("email", "in", batch)
+      .get();
+    usersSnap.docs.forEach((doc) => {
+      profilesByEmail.set(doc.data().email as string, doc.data());
+    });
+  }
+
+  // Enrich candidates
+  const candidates = snapshot.docs.map((doc) => {
     const data = { id: doc.id, ...doc.data() } as Record<string, unknown>;
     const email = data.email as string | null;
 
     if (email) {
-      const appsSnap = await db.collection("applications")
-        .where("email", "==", email)
-        .orderBy("appliedAt", "desc")
-        .limit(10)
-        .get();
-
-      data.applications = appsSnap.docs.map((appDoc) => {
+      const appDocs = appsByEmail.get(email) || [];
+      data.applications = appDocs.slice(0, 10).map((appDoc) => {
         const app = appDoc.data();
         return {
-          id: appDoc.id,
-          jobTitle: app.jobTitle,
-          jobCompany: app.jobCompany,
-          status: app.status,
-          appliedAt: app.appliedAt,
-          educationLevel: app.educationLevel,
-          dni: app.dni,
-          birthDate: app.birthDate,
-          address: app.address,
-          coverLetter: app.coverLetter,
-          cvPath: app.cvPath,
-          cvAnalysis: app.cvAnalysis,
-          scores: app.scores,
+          id: appDoc.id, jobTitle: app.jobTitle, jobCompany: app.jobCompany,
+          status: app.status, appliedAt: app.appliedAt, educationLevel: app.educationLevel,
+          dni: app.dni, birthDate: app.birthDate, address: app.address,
+          coverLetter: app.coverLetter, cvPath: app.cvPath, cvAnalysis: app.cvAnalysis, scores: app.scores,
         };
       });
 
-      // Pull user profile if exists
-      const usersSnap = await db.collection("users")
-        .where("email", "==", email)
-        .limit(1)
-        .get();
-
-      if (!usersSnap.empty) {
-        const u = usersSnap.docs[0].data();
+      const profile = profilesByEmail.get(email);
+      if (profile) {
         data.userProfile = {
-          summary: u.profile?.summary || null,
-          skills: u.profile?.skills || [],
-          languages: u.profile?.languages || [],
-          educationLevel: u.educationLevel || null,
-          image: u.image || null,
+          summary: profile.profile?.summary || null,
+          skills: profile.profile?.skills || [],
+          languages: profile.profile?.languages || [],
+          educationLevel: profile.educationLevel || null,
+          image: profile.image || null,
         };
       }
     }
 
     return data;
-  }));
+  });
 
+  candidatesCache = { data: candidates, ts: Date.now() };
   res.status(200).json(candidates);
 });
 

@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { User, Shield, LogOut } from "lucide-react";
 
 export default function UserMenu() {
-  const { user, logout } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -58,12 +58,14 @@ export default function UserMenu() {
               <User className="h-4 w-4" /> Mi cuenta
             </button>
 
-            <button
-              onClick={() => navigate("/admin")}
-              className="flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-sm text-[#1F4E79] transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5"
-            >
-              <Shield className="h-4 w-4" /> Panel admin
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => navigate("/admin")}
+                className="flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-sm text-[#1F4E79] transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5"
+              >
+                <Shield className="h-4 w-4" /> Panel admin
+              </button>
+            )}
           </div>
 
           <div className="border-t border-gray-100 py-1 dark:border-white/10">
