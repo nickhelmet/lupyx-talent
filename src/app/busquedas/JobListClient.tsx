@@ -43,24 +43,27 @@ export default function JobListClient() {
     // Direct match
     if (haystack.includes(q)) return true;
 
-    // Synonym/related terms matching
-    const synonyms: Record<string, string[]> = {
-      software: ["backend", "frontend", "fullstack", "developer", "engineer", "dev", "programador", "desarrollo"],
-      desarrollo: ["backend", "frontend", "fullstack", "developer", "engineer", "software", "programador"],
-      programador: ["developer", "engineer", "software", "desarrollo", "backend", "frontend"],
-      developer: ["engineer", "software", "desarrollo", "programador", "dev"],
-      diseño: ["design", "designer", "figma", "ui", "ux"],
-      design: ["diseño", "designer", "figma", "ui", "ux"],
-      remoto: ["remote", "100% remoto"],
-      remote: ["remoto", "100% remoto"],
-      marketing: ["growth", "ads", "publicidad", "seo", "sem"],
-      data: ["analytics", "datos", "bi", "dashboard", "sql"],
-      devops: ["cloud", "aws", "gcp", "azure", "infra", "sre", "docker", "kubernetes"],
-      mobile: ["android", "ios", "react native", "flutter", "móvil"],
-    };
+    // Synonym groups — any term in a group matches all others in that group
+    const synonymGroups = [
+      ["software", "backend", "frontend", "fullstack", "developer", "engineer", "dev", "programador", "desarrollo", "ingeniería", "código", "code"],
+      ["diseño", "design", "designer", "figma", "ui", "ux", "gráfico", "graphic", "visual", "creativo", "creative"],
+      ["marketing", "growth", "ads", "publicidad", "seo", "sem", "contenido", "content", "redes sociales", "social media", "branding", "comunicación"],
+      ["data", "analytics", "datos", "bi", "dashboard", "sql", "ciencia de datos", "data science", "machine learning", "ml", "ia", "ai"],
+      ["devops", "cloud", "aws", "gcp", "azure", "infra", "infraestructura", "sre", "docker", "kubernetes", "ci/cd"],
+      ["mobile", "android", "ios", "react native", "flutter", "móvil", "app"],
+      ["remoto", "remote", "100% remoto", "trabajo remoto", "home office"],
+      ["product", "producto", "product manager", "pm", "product owner", "po"],
+      ["qa", "testing", "tester", "quality", "calidad", "automation", "automatización"],
+      ["rrhh", "recursos humanos", "hr", "people", "talent", "talento", "recruiting", "reclutamiento"],
+    ];
 
-    const related = synonyms[q] || [];
-    return related.some((term) => haystack.includes(term));
+    // Find which group the search term belongs to, then check all terms in that group
+    const matchingGroup = synonymGroups.find((group) => group.some((term) => term === q || q.includes(term) || term.includes(q)));
+    if (matchingGroup) {
+      return matchingGroup.some((term) => haystack.includes(term));
+    }
+
+    return false;
   });
 
   return (
