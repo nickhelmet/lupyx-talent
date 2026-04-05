@@ -45,7 +45,7 @@ export default function JobListClient() {
 
     // Synonym groups — any term in a group matches all others in that group
     const synonymGroups = [
-      ["software", "backend", "frontend", "fullstack", "developer", "engineer", "dev", "programador", "desarrollo", "ingeniería", "código", "code"],
+      ["software", "backend", "frontend", "fullstack", "developer", "engineer", "dev", "programador", "desarrollador", "desarrollo", "ingeniería", "código", "code", "ingeniero"],
       ["diseño", "design", "designer", "figma", "ui", "ux", "gráfico", "graphic", "visual", "creativo", "creative"],
       ["marketing", "growth", "ads", "publicidad", "seo", "sem", "contenido", "content", "redes sociales", "social media", "branding", "comunicación"],
       ["data", "analytics", "datos", "bi", "dashboard", "sql", "ciencia de datos", "data science", "machine learning", "ml", "ia", "ai"],
